@@ -8,14 +8,16 @@ import com.example.appinventario.data.local.dao.InventarioDao
 import com.example.appinventario.data.local.entities.LlaveroEntity
 import com.example.appinventario.data.local.entities.MaterialEntity
 import com.example.appinventario.data.local.entities.RecetaEntity
-import com.example.appinventario.data.local.entities.UsuariosEntity
+import com.example.appinventario.data.local.entities.UsuarioEntity
 
 @Database(
-    entities = [MaterialEntity::class,
+    entities = [
+        MaterialEntity::class,
         LlaveroEntity::class,
         RecetaEntity::class,
-        UsuariosEntity::class],
-    version = 1,
+        UsuarioEntity::class
+               ],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

@@ -11,37 +11,33 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appinventario.data.local.database.AppDatabase
+import com.example.appinventario.ui.screens.MaterialesScreen
 import com.example.appinventario.ui.theme.AppInventarioTheme
+import com.example.appinventario.ui.viewmodels.InventarioViewModel
+import com.example.appinventario.ui.viewmodels.InventarioViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 1. Obtener la instancia de la base de datos nativa SQLite
+        val database = AppDatabase.getDatabase(this)
+        // 2. Obtener el DAO (el mensajero entre Kotlin y SQL
+        val dao = database.inventarioDao()
+        // 3. Crear la "Fábrica" pasándole el DAO
+        val factory = InventarioViewModelFactory(dao)
+
         enableEdgeToEdge()
         setContent {
             AppInventarioTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                // Creamos o recuperamos el ViewModel
+                val inventarioViewModel: InventarioViewModel = viewModel( factory = factory)
+                // Llamamos a la pantalla principal de Admin como prueba
+                MaterialesScreen(viewModel = inventarioViewModel)
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AppInventarioTheme {
-        Greeting("Android")
     }
 }

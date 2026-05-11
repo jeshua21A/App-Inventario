@@ -3,7 +3,7 @@ package com.example.appinventario.data.local.entities
 import androidx.room.Entity
 
 @Entity(
-    tableName = "recetas",
+    tableName = "receta",
     primaryKeys = ["llaveroId", "materialId"]
 )
 data class RecetaEntity(
