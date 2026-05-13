@@ -3,7 +3,7 @@ package com.example.appinventario.data.local.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "materiales")
+@Entity(tableName = "material")
 data class MaterialEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

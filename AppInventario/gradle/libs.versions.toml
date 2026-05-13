@@ -11,8 +11,9 @@ composeBom = "2024.09.00"
 kotlin = "2.0.21"
 #kotlinxCoroutines = "1.8.1"
 #hilt = "2.52"
-room = "2.6.1"
-ksp = "2.0.21-1.0.27"
+room = "2.8.4"
+ksp = "2.0.21-1.0.25"
+androidxLifecycle = "2.8.0"
 #retrofit = "2.9.0"
 #okhttp = "4.12.0"
 
@@ -35,6 +36,7 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = {group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxLifecycle"}
 #retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 #retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 #okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
