@@ -25,7 +25,6 @@ fun LoginScreen(
     var usuario by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
 
-    // Fondo sólido color crema
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -64,9 +63,9 @@ fun LoginScreen(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
 
-                        // Para el LABEL (etiqueta "Usuario")
+                        // Para el label
                         unfocusedLabelColor = Color.White,
-                        // El fondo del campo (opcional)
+                        // El fondo del campo 
                         focusedContainerColor = Color(0xFFcf6060),
                         unfocusedContainerColor = Color(0xFFb23e3e)
                     )
@@ -74,7 +73,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo Contraseña - con fondo transparente
+                // Campo Contraseña
                 OutlinedTextField(
                     value = contrasena,
                     onValueChange = { contrasena = it },
@@ -88,9 +87,7 @@ fun LoginScreen(
                         unfocusedBorderColor = Color.Gray,
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        // Para el LABEL (etiqueta "Usuario")
                         unfocusedLabelColor = Color.White,
-                        // HACER EL FONDO TRANSPARENTE
                         focusedContainerColor = Color(0xFFcf6060),
                         unfocusedContainerColor = Color(0xFFb23e3e)
                     )
