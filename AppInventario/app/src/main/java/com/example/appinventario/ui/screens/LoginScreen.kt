@@ -3,6 +3,7 @@ package com.example.appinventario.ui.screens.LoginScreen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,6 +26,11 @@ fun LoginScreen(
     var usuario by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
 
+    // Estados para mensajes de error
+    var errorUsuario by remember { mutableStateOf<String?>(null) }
+    var errorContrasena by remember { mutableStateOf<String?>(null) }
+    var errorGeneral by remember { mutableStateOf<String?>(null) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -33,9 +39,10 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 32.dp),
+                .padding(horizontal = 32.dp)
+                .padding(top = 65.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             // Logo
             Image(
@@ -44,62 +51,136 @@ fun LoginScreen(
                 modifier = Modifier.size(300.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Campos de login 
+            // Campos de login
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Campo Usuario
-                OutlinedTextField(
-                    value = usuario,
-                    onValueChange = { usuario = it },
-                    label = { Text("Usuario") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        // Para el texto escrito por el usuario
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
+                // Campo Usuario con mensaje de error
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = usuario,
+                        onValueChange = {
+                            usuario = it
+                            errorUsuario = null // Limpiar error al escribir
+                            errorGeneral = null
+                        },
+                        label = { Text("Usuario") },
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = errorUsuario != null,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            // Para el texto escrito por el usuario
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
 
-                        // Para el label
-                        unfocusedLabelColor = Color.White,
-                        // El fondo del campo 
-                        focusedContainerColor = Color(0xFFcf6060),
-                        unfocusedContainerColor = Color(0xFFb23e3e)
+                            // Para el label
+                            unfocusedLabelColor = Color.White,
+                            // El fondo del campo
+                            focusedContainerColor = Color(0xFFcf6060),
+                            unfocusedContainerColor = Color(0xFFb23e3e),
+                            // Colores para estado de error
+                            errorBorderColor = Color.Red,
+                            focusedBorderColor = if (errorUsuario != null) Color.Red else Color(0xFF9F6C57),
+                            unfocusedBorderColor = if (errorUsuario != null) Color.Red else Color.Gray
+                        )
                     )
-                )
+
+                    // Mensaje de error para Usuario (solo visible cuando hay error)
+                    if (errorUsuario != null) {
+                        Text(
+                            text = errorUsuario!!,
+                            color = Color.Red,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo Contraseña
-                OutlinedTextField(
-                    value = contrasena,
-                    onValueChange = { contrasena = it },
-                    label = { Text("Contraseña") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF9F6C57),
-                        unfocusedBorderColor = Color.Gray,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        unfocusedLabelColor = Color.White,
-                        focusedContainerColor = Color(0xFFcf6060),
-                        unfocusedContainerColor = Color(0xFFb23e3e)
+                // Campo Contraseña con mensaje de error
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = contrasena,
+                        onValueChange = {
+                            contrasena = it
+                            errorContrasena = null
+                            errorGeneral = null
+                        },
+                        label = { Text("Contraseña") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        isError = errorContrasena != null,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF9F6C57),
+                            unfocusedBorderColor = if (errorContrasena != null) Color.Red else Color.Gray,
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            unfocusedLabelColor = Color.White,
+                            focusedContainerColor = Color(0xFFcf6060),
+                            unfocusedContainerColor = Color(0xFFb23e3e),
+                            errorBorderColor = Color.Red
+                        )
                     )
-                )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                    // Mensaje de error para Contraseña (solo visible cuando hay error)
+                    if (errorContrasena != null) {
+                        Text(
+                            text = errorContrasena!!,
+                            color = Color.Red,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Mensaje de error general (solo visible cuando hay error)
+                if (errorGeneral != null) {
+                    Text(
+                        text = errorGeneral!!,
+                        color = Color.Red,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Botón Iniciar Sesión
                 Button(
                     onClick = {
-                        if (usuario.isNotBlank() && contrasena.isNotBlank()) {
-                            onLoginExitoso()
+                        // Limpiar errores previos
+                        errorUsuario = null
+                        errorContrasena = null
+                        errorGeneral = null
+
+                        // Validaciones simuladas
+                        when {
+                            usuario.isBlank() -> {
+                                errorUsuario = "El usuario es obligatorio"
+                            }
+                            contrasena.isBlank() -> {
+                                errorContrasena = "La contraseña es obligatoria"
+                            }
+                            else -> {
+                                // Simular validación de credenciales
+                                if (usuario == "admin" && contrasena == "1234") {
+                                    onLoginExitoso()
+                                } else {
+                                    errorGeneral = "Usuario o contraseña incorrectos"
+                                }
+                            }
                         }
                     },
                     modifier = Modifier
