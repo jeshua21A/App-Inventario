@@ -46,7 +46,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Campos de login - SIN recuadro blanco
+            // Campos de login 
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -59,7 +59,7 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        // Para el texto ESCRITO por el usuario
+                        // Para el texto escrito por el usuario
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
 
