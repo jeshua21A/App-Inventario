@@ -2,28 +2,24 @@ package com.example.appinventario.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.appinventario.R
+import com.example.appinventario.ui.screens.components.catalogo.ProductoCard
+import com.example.appinventario.ui.screens.components.catalogo.BarraBusqueda
+import com.example.appinventario.ui.screens.components.catalogo.ProductoDetalles
 import com.example.appinventario.ui.theme.AppInventarioTheme
 
 // Simulación de los atributos que serán extraídos de la base de datos
-data class Producto(
+data class Llavero(
     val id: Int,
     val nombre: String,
     val descripcion: String,
@@ -32,17 +28,35 @@ data class Producto(
 
 @Composable
 fun CatalogoScreen(
-    onProductoClick: (Producto) -> Unit = {}
+    onProductoClick: (Llavero) -> Unit = {},
+    mostrarDialogoEnPreview: Boolean = false
 ) {
     var busquedaTexto by remember { mutableStateOf("") }
 
+    // Estado para el dialogo
+    var productoSeleccionado by remember {
+        mutableStateOf(
+            if (mostrarDialogoEnPreview) {
+                Llavero(
+                    id = 1,
+                    nombre = "Producto Ejemplo",
+                    descripcion = "Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.",
+                    precio = 100.0
+                )
+            } else {
+                null
+            }
+        )
+    }
+
+    // DATOS SIMULADOS - Lista temporal (cambiar despues por BD)
     val productos = listOf(
-        Producto(1, "Llavero de cuero", "Llavero de cuero personalizado con letras grabadas", 50.50),
-        Producto(2, "Llavero de cuero", "Llavero de cuero personalizado con letras grabadas", 50.50),
-        Producto(3, "Llavero de cuero", "Personalizado con letras grabadas", 50.50),
-        Producto(4, "Llavero de cuero", "Llavero de cuero personalizado con letras grabadas", 50.50),
-        Producto(5, "Llavero de cuero", "Llavero de cuero personalizado con letras grabadas", 50.50),
-        Producto(6, "Llavero de cuero", "Llavero de cuero personalizado con letras grabadas", 50.50)
+        Llavero(1, "Llavero de cuero", "Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.", 50.50),
+        Llavero(2, "Llavero metálico", "Llavero de metal grabado con diseño personalizado. Resistente y duradero.", 45.00),
+        Llavero(3, "Llavero acrílico", "Llavero acrílico transparente con foto impresa. Perfecto para fotos de mascotas.", 35.50),
+        Llavero(4, "Llavero madera", "Llavero artesanal de madera de olivo. Pieza única y ecológica.", 60.00),
+        Llavero(5, "Llavero con iniciales", "Llavero de cuero con iniciales grabadas en metal dorado.", 55.00),
+        Llavero(6, "Llavero multifuncional", "Llavero con abrebotellas y destapador. Práctico y funcional.", 40.00)
     )
 
     val productosFiltrados = if (busquedaTexto.isBlank()) {
@@ -77,27 +91,10 @@ fun CatalogoScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Cuadro de busqueda
-            OutlinedTextField(
+            // Barra de búsqueda
+            BarraBusqueda(
                 value = busquedaTexto,
-                onValueChange = { busquedaTexto = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                placeholder = {
-                    Text(
-                        text = "Buscar productos...",
-                        color = Color.Gray
-                    )
-                },
-                shape = RoundedCornerShape(24.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    unfocusedBorderColor = Color(0xFFD4A373),
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black
-                ),
-                singleLine = true
+                onValueChange = { busquedaTexto = it }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -117,9 +114,9 @@ fun CatalogoScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         if (filaProductos.size > 0) {
-                            ProductoCardVertical(
+                            ProductoCard(
                                 producto = filaProductos[0],
-                                onClick = { onProductoClick(filaProductos[0]) },
+                                onClick = { productoSeleccionado = filaProductos[0] },
                                 modifier = Modifier.weight(1f)
                             )
                         } else {
@@ -127,9 +124,9 @@ fun CatalogoScreen(
                         }
 
                         if (filaProductos.size > 1) {
-                            ProductoCardVertical(
+                            ProductoCard(
                                 producto = filaProductos[1],
-                                onClick = { onProductoClick(filaProductos[1]) },
+                                onClick = { productoSeleccionado = filaProductos[1] },
                                 modifier = Modifier.weight(1f)
                             )
                         } else {
@@ -140,91 +137,24 @@ fun CatalogoScreen(
             }
         }
     }
-}
 
-@Composable
-fun ProductoCardVertical(
-    producto: Producto,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFCC845B)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Espacio para la imagen
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFD4A373).copy(alpha = 0.3f)),
-                contentAlignment = Alignment.Center
-            ) {
-                //Campo de la imagen (Cambiar mas adelante por iumagen en lugar de texto)
-                Text(
-                    text = "Img",
-                    fontSize = 48.sp,
-                    color = Color(0xFF5D4037)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            //Nombre del producto
-            Text(
-                text = producto.nombre,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            //Descripcion del producto
-            Text(
-                text = producto.descripcion,
-                fontSize = 14.sp,
-                color = Color(0xFFFFF5E6),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            //Precio del Producto
-            Text(
-                text = "$${String.format("%.2f", producto.precio)}",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFfffaed)
-            )
-        }
+    // Diálogo de detalles
+    if (productoSeleccionado != null) {
+        ProductoDetalles(
+            producto = productoSeleccionado!!,
+            onCerrar = { productoSeleccionado = null }
+        )
     }
 }
 
 @Preview(
-    name = "Catálogo Screen Preview",
+    name = "Catlogo Screen Preview",
     showBackground = true,
     showSystemUi = true
 )
 @Composable
 fun CatalogoScreenPreview() {
     AppInventarioTheme {
-        CatalogoScreen()
+        CatalogoScreen(mostrarDialogoEnPreview = false)
     }
 }
