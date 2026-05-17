@@ -29,7 +29,7 @@ fun BarraBusqueda(
                 color = Color.Gray
             )
         },
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(15.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,
