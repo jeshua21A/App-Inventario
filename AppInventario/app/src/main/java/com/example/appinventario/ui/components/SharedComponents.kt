@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -30,8 +31,7 @@ import com.example.appinventario.R
 import com.example.appinventario.data.local.entities.LlaveroEntity
 import com.example.appinventario.ui.theme.AppColors
 
-// ==================== TOP BAR ====================
-
+// TOP BAR
 @Composable
 fun InventarioTopBar(
     titulo: String,
@@ -77,33 +77,24 @@ fun InventarioTopBar(
     }
 }
 
-// ==================== BOTÓN AÑADIR ====================
-
+// BOTON AÑADIR
 @Composable
 fun BotonAnadir(
-    texto: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Button(
+    FloatingActionButton(
         onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = AppColors.RedDark,
-            contentColor = AppColors.TextOnDark
-        )
+        modifier = modifier.size(48.dp),
+        shape = CircleShape,
+        containerColor = AppColors.RedDark,
+        contentColor = AppColors.TextOnDark
     ) {
-        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(texto, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Icon(Icons.Default.Add, contentDescription = "Agregar producto")
     }
 }
 
-// ==================== MENÚ LATERAL ====================
-
+// MENU LATERAL
 data class OpcionMenu(
     val etiqueta: String,
     val onClick: () -> Unit,
@@ -117,7 +108,9 @@ fun MenuLateral(
     onCerrar: () -> Unit
 ) {
     ModalDrawerSheet(
-        modifier = Modifier.width(220.dp).padding(top=85.dp),
+        modifier = Modifier
+            .width(220.dp)
+            .padding(top = 82.dp),
         drawerContainerColor = AppColors.RedDark,
         drawerShape = RoundedCornerShape(
             topStart = 0.dp,
@@ -127,10 +120,6 @@ fun MenuLateral(
         ),
         drawerTonalElevation = 8.dp
     ) {
-
-        Spacer(modifier = Modifier.height(8.dp))
-        HorizontalDivider(color = AppColors.Cream.copy(alpha = 0.3f))
-        Spacer(modifier = Modifier.height(8.dp))
 
         opciones.forEach { opcion ->
             TextButton(
@@ -157,8 +146,7 @@ fun MenuLateral(
     }
 }
 
-// ==================== BARRA DE BÚSQUEDA ====================
-
+// BARRA DE BÚSQUEDA
 @Composable
 fun BarraBusqueda(
     value: String,
@@ -185,7 +173,7 @@ fun BarraBusqueda(
     )
 }
 
-// ==================== PRODUCTO CARD (SOLO LECTURA) ====================
+// PRODUCTO CARD
 
 @Composable
 fun ProductoCard(
@@ -241,7 +229,7 @@ fun ProductoCard(
     }
 }
 
-// ==================== STOCK BADGE ====================
+// STOCK BADGE
 
 @Composable
 fun StockBadge(stockActual: Double, stockMinimo: Double) {
@@ -258,7 +246,7 @@ fun StockBadge(stockActual: Double, stockMinimo: Double) {
     }
 }
 
-// ==================== DIÁLOGO DE DETALLES DEL PRODUCTO ====================
+//DIÁLOGO DE DETALLES DEL PRODUCTO
 
 @Composable
 fun ProductoDetallesDialog(
