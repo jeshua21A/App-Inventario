@@ -16,6 +16,7 @@ object AppColors {
     val Cream = Color(0xFFFFFAED)        // fondo general
     val RedDark = Color(0xFFb23e3e)    // header / toolbar
     val RedButtom = Color(0xFFC75041)
+    val RedLigh = Color(0xFFec5757)
     val BrownMid = Color(0xFFDC8959)     // cards de productos
     val BrownLight = Color(0xFFD4A373)   // acentos, bordes activos
     val BrownText = Color(0xFF5D4037)    // texto principal oscuro
