@@ -2,10 +2,10 @@ package com.example.appinventario.ui.screens.Edicion
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -13,14 +13,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.appinventario.R
 import com.example.appinventario.ui.theme.AppColors
 
 @Composable
@@ -45,15 +42,18 @@ fun LlaveroFormDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .heightIn(max = 600.dp),  // ← Altura máxima, pero no fija
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = AppColors.Cream),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
+            // Agregar scroll a toda la columna
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState()),  // ← Scroll habilitado
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Título
@@ -100,7 +100,6 @@ fun LlaveroFormDialog(
                         .background(AppColors.BrownLight.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    // TODO: Reemplazar con imagen real cuando esté disponible
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -211,8 +210,7 @@ fun LlaveroFormDialog(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = AppColors.RedLigh,
-                            contentColor = AppColors.Cream
+                            contentColor = AppColors.BrownText
                         )
                     ) {
                         Text("Cancelar", fontSize = 14.sp)
