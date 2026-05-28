@@ -59,7 +59,9 @@ fun CatalogoScreen(
                 LlaveroEntity(1, "Llavero de cuero", "Llavero de cuero personalizado", 50.50),
                 LlaveroEntity(2, "Llavero metálico", "Llavero de metal grabado", 45.00),
                 LlaveroEntity(3, "Llavero acrílico", "Llavero acrílico transparente", 35.50),
-                LlaveroEntity(4, "Llavero madera", "Llavero artesanal de madera", 60.00)
+                LlaveroEntity(4, "Llavero madera", "Llavero artesanal de madera", 60.00),
+                LlaveroEntity(5, "Llavero con iniciales", "Llavero de cuero con iniciales grabadas", 55.00),
+                LlaveroEntity(6, "Llavero multifuncional", "Llavero con abrebotellas y destapador", 40.00)
             )
         )
     }
