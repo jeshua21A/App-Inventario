@@ -35,6 +35,20 @@ class MainActivity : ComponentActivity() {
             AppInventarioTheme {
                 // Creamos o recuperamos el ViewModel
                 val inventarioViewModel: InventarioViewModel = viewModel( factory = factory)
+                //--- Ejemplos para probar screen por screen:
+                //MaterialesScreen(viewModel = inventarioViewModel)
+
+                //viewModel = inventarioViewModel,
+                //navController = rememberNavController()
+
+                //--Probar proyecto completo
+                // Requiere los siguientes cambios adicionales:
+                // 1. Crear las rutas en AppNavGraph.kt
+                // 2. Conectar LoginScreen con viewModel.login() y los demas screens
+                // 3. Crear Pantallas faltantes
+                //
+                // AppNavGraph(viewModel = inventarioViewModel)
+
                 // Llamamos a la pantalla principal de Admin como prueba
                 MaterialesScreen(viewModel = inventarioViewModel)
             }
