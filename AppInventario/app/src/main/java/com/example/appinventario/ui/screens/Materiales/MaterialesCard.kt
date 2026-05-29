@@ -27,14 +27,14 @@ fun MaterialCard(
 
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = AppColors.BrownMid),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(14.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Imagen placeholder
@@ -70,12 +70,13 @@ fun MaterialCard(
             ) {
                 Text(
                     text = "Stock Actual",
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
                     color = AppColors.TextOnCard
                 )
                 Text(
                     text = material.stockActual.toString(),
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (stockBajo) AppColors.ErrorRed else AppColors.TextOnDark
                 )
@@ -88,12 +89,13 @@ fun MaterialCard(
             ) {
                 Text(
                     text = "Stock Mínimo",
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
                     color = AppColors.TextOnCard
                 )
                 Text(
                     text = material.stockMinimo.toString(),
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = AppColors.TextOnDark
                 )
@@ -106,12 +108,13 @@ fun MaterialCard(
             ) {
                 Text(
                     text = "Medida",
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
                     color = AppColors.TextOnCard
                 )
                 Text(
                     text = material.unidadMedida,
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = AppColors.TextOnDark
                 )
@@ -124,12 +127,13 @@ fun MaterialCard(
             ) {
                 Text(
                     text = "Precio c/u",
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
                     color = AppColors.TextOnCard
                 )
                 Text(
                     text = "$${String.format("%.2f", material.precioPorUnidad)}",
-                    fontSize = 13.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = AppColors.TextOnDark
                 )
@@ -147,13 +151,7 @@ fun MaterialCard(
                     contentColor = Color.White
                 )
             ) {
-                Text(
-                    text = "Editar",
-                    fontSize = 13.sp,
-                    style = androidx.compose.ui.text.TextStyle(
-                        color = AppColors.White
-                    )
-                )
+                Text("Editar", fontSize = 13.sp)
             }
         }
     }
