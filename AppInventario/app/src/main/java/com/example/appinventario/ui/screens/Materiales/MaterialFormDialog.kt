@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -96,6 +98,7 @@ fun MaterialFormDialog(
                     label = { Text("Stock Actual") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = AppColors.BrownLight,
                         unfocusedBorderColor = AppColors.BrownLight.copy(alpha = 0.5f)
@@ -111,6 +114,7 @@ fun MaterialFormDialog(
                     label = { Text("Stock Mínimo") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = AppColors.BrownLight,
                         unfocusedBorderColor = AppColors.BrownLight.copy(alpha = 0.5f)
@@ -143,6 +147,7 @@ fun MaterialFormDialog(
                     modifier = Modifier.fillMaxWidth(),
                     prefix = { Text("$", color = AppColors.BrownSub) },
                     shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = AppColors.BrownLight,
                         unfocusedBorderColor = AppColors.BrownLight.copy(alpha = 0.5f)
