@@ -71,6 +71,9 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+    // Teclado numerico
+    implementation("androidx.compose.ui:ui-text:1.7.5")
+
     // Retrofit & OkHttp (Networking)
     //implementation(libs.retrofit)
     //implementation(libs.retrofit.gson)
