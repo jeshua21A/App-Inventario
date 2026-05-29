@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -143,10 +144,16 @@ fun MaterialCard(
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = AppColors.RedDark,
-                    contentColor = AppColors.TextOnDark
+                    contentColor = Color.White
                 )
             ) {
-                Text("Editar", fontSize = 13.sp)
+                Text(
+                    text = "Editar",
+                    fontSize = 13.sp,
+                    style = androidx.compose.ui.text.TextStyle(
+                        color = AppColors.White
+                    )
+                )
             }
         }
     }

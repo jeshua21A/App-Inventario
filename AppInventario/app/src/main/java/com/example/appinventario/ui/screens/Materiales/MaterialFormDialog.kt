@@ -64,7 +64,7 @@ fun MaterialFormDialog(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Título
+                // Titulo
                 Text(
                     text = titulo,
                     fontSize = 20.sp,
@@ -149,7 +149,7 @@ fun MaterialFormDialog(
                     )
                 )
 
-                // Área de foto (opcional para materiales)
+                // Area de foto (opcional para materiales)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
@@ -189,7 +189,7 @@ fun MaterialFormDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Botón Cambiar foto
+                // Boton Cambiar foto
                 OutlinedButton(
                     onClick = { /* TODO: Implementar selector de imagen */ },
                     modifier = Modifier.fillMaxWidth(),
@@ -217,7 +217,7 @@ fun MaterialFormDialog(
                     )
                 }
 
-                // Botón Eliminar (si está en modo edición)
+                // Boton Eliminar (si esta en modo edicion)
                 if (onEliminar != null) {
                     Spacer(modifier = Modifier.height(16.dp))
                     TextButton(
@@ -247,7 +247,7 @@ fun MaterialFormDialog(
                         Text("Cancelar", fontSize = 14.sp)
                     }
 
-                    // Botón Aceptar
+                    // Boton Aceptar
                     Button(
                         onClick = {
                             val stockActualDouble = stockActual.toDoubleOrNull()
