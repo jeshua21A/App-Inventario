@@ -39,8 +39,8 @@ fun RecetaCard(
             ) {
                 Text(
                     text = llavero.nombre,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
                     color = AppColors.TextOnDark,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -48,7 +48,7 @@ fun RecetaCard(
                 )
                 Text(
                     text = "$${String.format("%.2f", llavero.precioVenta)}",
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = AppColors.TextOnDark
                 )
@@ -57,9 +57,10 @@ fun RecetaCard(
             // Descripcion
             Text(
                 text = llavero.descripcion,
-                fontSize = 13.sp,
+                fontSize = 17.sp,
                 color = AppColors.TextOnCard,
                 maxLines = 2,
+                fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis
             )
 
@@ -71,15 +72,16 @@ fun RecetaCard(
             // Materiales necesarios
             Text(
                 text = "Materiales necesarios:",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = AppColors.TextOnCard
+                fontSize = 18.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = AppColors.TextOnDark
             )
 
             if (materiales.isEmpty()) {
                 Text(
                     text = "Sin materiales asignados",
-                    fontSize = 12.sp,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
                     color = AppColors.TextOnCard.copy(alpha = 0.7f)
                 )
             } else {
@@ -90,13 +92,14 @@ fun RecetaCard(
                     ) {
                         Text(
                             text = material.nombre,
-                            fontSize = 12.sp,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
                             color = AppColors.TextOnCard
                         )
                         Text(
                             text = "${cantidad} ${material.unidadMedida}",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.ExtraBold,
                             color = AppColors.TextOnCard
                         )
                     }

@@ -21,7 +21,7 @@ object AppColors {
     val BrownText = Color(0xFF5D4037)    // texto principal oscuro
     val BrownSub = Color(0xFF6D4C41)     // texto secundario
     val TextOnDark = Color(0xFFFFFAED)   // texto sobre fondos oscuros
-    val TextOnCard = Color(0xFFf6d89f)   // descripcion sobre card naranja
+    val TextOnCard = Color(0xFFF8E1B9)   // descripcion sobre card naranja
     val ErrorRed = Color(0xFFD32F2F)     // eliminar / error
     val White = Color(0xFFFFFFFF)
     val Scrim = Color(0x80000000)        // overlay de dialogo
