@@ -10,9 +10,6 @@ import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     routing {
-        get("/") {
-            call.respondText("API del Sistema App Inventario en Funcionamiento")
-        }
         // Módulos de los endpoints
         llaveroRoutes()
         materialRoutes()
