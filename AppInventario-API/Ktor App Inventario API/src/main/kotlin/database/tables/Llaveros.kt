@@ -1,7 +1,7 @@
 package com.example.database.tables
 import org.jetbrains.exposed.sql.Table
 
-object Laveros : Table("llavero") {
+object Llaveros : Table("llavero") {
     val id = integer("id")
     val nombre = varchar("nombre", 100)
     val description = varchar("description", 255)
