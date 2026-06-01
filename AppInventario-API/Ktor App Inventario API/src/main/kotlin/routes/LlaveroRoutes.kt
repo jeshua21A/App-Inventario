@@ -28,12 +28,10 @@ fun Route.llaveroRoutes() {
 
         // Obtener un registro
         get("/{id}") {
-
         }
 
         // Crear nuevo llavero
         post {
-
         }
 
         // Actuializar registro
