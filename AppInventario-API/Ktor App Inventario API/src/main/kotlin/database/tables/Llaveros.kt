@@ -6,4 +6,6 @@ object Llaveros : Table("llavero") {
     val nombre = varchar("nombre", 100)
     val description = varchar("description", 255)
     val precioVenta = double("precioventa")
+
+    override val primaryKey = PrimaryKey(id)
 }

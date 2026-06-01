@@ -8,4 +8,6 @@ object Materiales : Table("material") {
     val unidadMedida = varchar("unidadmedida", 100)
     val stockMinimo = double("stockminimo")
     val precioPorUnidad = double("precioporunidad")
+
+    override val primaryKey = PrimaryKey(id)
 }
