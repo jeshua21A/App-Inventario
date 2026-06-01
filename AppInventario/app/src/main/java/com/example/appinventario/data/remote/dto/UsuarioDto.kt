@@ -1,9 +1,9 @@
-package com.example.models
+package com.example.appinventario.data.remote.dto
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Usuario(
+data class UsuarioDto(
     val id: Int? = null,
     val username: String,
     val password: String,

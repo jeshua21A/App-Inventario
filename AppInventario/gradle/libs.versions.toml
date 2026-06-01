@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.1"
+agp = "8.7.3"
 coreKtx = "1.10.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -9,14 +9,14 @@ activityCompose = "1.8.0"
 composeBom = "2024.09.00"
 # Agregando otras versiones para el proyecto
 kotlin = "2.0.21"
-#kotlinxCoroutines = "1.8.1"
-#hilt = "2.52"
 room = "2.8.4"
 ksp = "2.0.21-1.0.25"
 androidxLifecycle = "2.8.0"
 navigationCompose = "2.8.9"
-#retrofit = "2.9.0"
-#okhttp = "4.12.0"
+kotlinxSerialization = "1.6.3"
+retrofit = "2.11.0"
+kotlinPlugin = "2.0.0"
+hilt = "2.51.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,18 +39,17 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-ktx = {group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxLifecycle"}
-#retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-#retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
-#okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-#hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
-#hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-#kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
-#kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization"}
+retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit"}
+retrofit-converter-kotlinx = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit"}
+dagger-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt"}
+dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 # Plugins para el proyecto
-#kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-#hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinPlugin"}
+dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

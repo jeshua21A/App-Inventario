@@ -22,6 +22,15 @@ dependencies {
     implementation(ktorLibs.server.netty)
     implementation(libs.logback.classic)
 
+    // Database from Supabase
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.postgresql)
+    implementation(libs.hikariCP)
+
+    // Encryption JVM
+    implementation(libs.security.jbcrypt)
+
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
 }

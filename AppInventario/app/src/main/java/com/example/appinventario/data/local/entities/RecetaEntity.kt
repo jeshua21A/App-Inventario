@@ -8,7 +8,7 @@ import androidx.room.Entity
 )
 data class RecetaEntity(
     val id: Int = 0,
-    val llaveroId: Int,
-    val materialId: Int,
-    val cantidadUsada: Double
+    val idLlavero: Int,
+    val idMaterial: Int,
+    val cantidad: Double
 )
