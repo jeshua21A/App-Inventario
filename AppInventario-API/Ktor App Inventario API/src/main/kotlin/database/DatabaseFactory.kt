@@ -2,7 +2,9 @@ package com.example.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 // Conexion a la Base de Datos
 /*
@@ -28,3 +30,6 @@ object DatabaseFactory {
         Database.connect(HikariDataSource(config))
     }
 }
+
+suspend fun <T> dbQuery(block: suspend () -> T): T =
+    newSuspendedTransaction(Dispatchers.IO) { block() }

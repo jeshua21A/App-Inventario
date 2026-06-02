@@ -1,9 +1,20 @@
 [versions]
 kotlin = "2.3.21"
 logback = "1.5.21"
+# versiones para el proyecto
+exposed = "0.61.0"
+postgresql = "42.7.7"
+hikari = "6.3.0"
+jbcrypt = "0.4"
 
 [libraries]
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+# Librerias para el proyecto
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
+hikariCP = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikari"}
+security-jbcrypt = { group = "org.mindrot", name = "jbcrypt", version.ref = "jbcrypt" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
