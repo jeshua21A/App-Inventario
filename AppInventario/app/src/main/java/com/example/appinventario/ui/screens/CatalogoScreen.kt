@@ -57,14 +57,14 @@ fun CatalogoScreen(
         }
     }
 
-    // Filtrar llaveros según búsqueda
+    // Filtrar llaveros segun busqueda
     val llaverosVisibles = if (busquedaTexto.isBlank()) listaLlaveros
     else listaLlaveros.filter {
         it.nombre.contains(busquedaTexto, ignoreCase = true) ||
                 it.descripcion.contains(busquedaTexto, ignoreCase = true)
     }
 
-    // Opciones del menú lateral (cliente)
+    // Opciones del menu lateral
     val opcionesMenu = getOpcionesCliente(
         onCerrarSesion = { /* TODO: Implementar cierre de sesión */ }
     )
@@ -188,7 +188,7 @@ fun CatalogoScreen(
         }
     }
 
-    // Diálogo de detalles del producto
+    // Dialogo de detalles del producto
     if (llaveroSeleccionado != null) {
         ProductoDetallesDialog(
             llavero = llaveroSeleccionado!!,

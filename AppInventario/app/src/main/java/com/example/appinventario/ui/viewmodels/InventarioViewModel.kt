@@ -9,7 +9,6 @@ import com.example.appinventario.data.local.entities.RecetaEntity
 import com.example.appinventario.data.local.entities.UsuarioEntity
 import com.example.appinventario.data.network.InventarioApiService
 import com.example.appinventario.data.remote.mapper.toEntity
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 // Estado de autenticación
 sealed class AuthState {
@@ -26,16 +24,15 @@ sealed class AuthState {
     object CredencialesInvalidas : AuthState()
 }
 
-@HiltViewModel  // ← AGREGADO: Le dice a Hilt que puede inyectar este ViewModel
-class InventarioViewModel @Inject constructor(  // ← MODIFICADO: @Inject en constructor
+class InventarioViewModel(
     private val inventarioDao: InventarioDao,
-    private val apiService: InventarioApiService  // ← AGREGADO: Servicio de API para Supabase
+    private val apiService: InventarioApiService
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
-    // 1. Observer todos los materiales para confirmar cuando habrá algún cambio
+    // 1. Observer todos los materiales para confirmar cuando habra algun cambio
     val listaMateriales: StateFlow<List<MaterialEntity>> = inventarioDao.getAllMateriales()
         .stateIn(
             scope = viewModelScope,
@@ -43,63 +40,7 @@ class InventarioViewModel @Inject constructor(  // ← MODIFICADO: @Inject en co
             initialValue = emptyList()
         )
 
-    // Estados para sincronizacion con Supabase
-    private val _syncMessage = MutableStateFlow<String?>(null)
-    val syncMessage: StateFlow<String?> = _syncMessage.asStateFlow()
-
-    private val _isSyncing = MutableStateFlow(false)
-    val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
-
-    // Metodos para probar y sincronizar con Supabase
-
-    // Probar conexión con Supabase
-    fun testSupabaseConnection() {
-        viewModelScope.launch {
-            _isSyncing.value = true
-            _syncMessage.value = "Probando conexión con Supabase..."
-
-            try {
-                val materiales = apiService.getMateriales()
-                _syncMessage.value = "Conexión exitosa! Se encontraron ${materiales.size} materiales en la nube"
-
-                // Log para debug (opcional, se puede eliminar después)
-                android.util.Log.d("SUPABASE", "Materiales encontrados: ${materiales.size}")
-            } catch (e: Exception) {
-                _syncMessage.value = "Error de conexión: ${e.message}"
-                android.util.Log.e("SUPABASE", "Error de conexión", e)
-            } finally {
-                _isSyncing.value = false
-            }
-        }
-    }
-
-    // Sincronizar materiales desde Supabase a Room (base local)
-    fun syncMaterialesFromCloud() {
-        viewModelScope.launch {
-            _isSyncing.value = true
-            _syncMessage.value = "Sincronizando desde Supabase..."
-
-            try {
-                // Obtener materiales de Supabase
-                val materialesDto = apiService.getMateriales()
-
-                // Convertir y guardar cada material en Room
-                materialesDto.forEach { dto ->
-                    val entity = dto.toEntity()
-                    inventarioDao.insertMaterial(entity)
-                }
-
-                _syncMessage.value = "Sincronizacion completada! ${materialesDto.size} materiales guardados en Room"
-            } catch (e: Exception) {
-                _syncMessage.value = " Error al sincronizar: ${e.message}"
-                android.util.Log.e("SUPABASE", "Error de sincronización", e)
-            } finally {
-                _isSyncing.value = false
-            }
-        }
-    }
-
-    // 2. Función para insertar un nuevo material
+    // 2. Funcion para insertar un nuevo material
     fun agregarMaterial(nombre: String, stock: Double, unidad: String, minimo: Double, precio: Double){
         viewModelScope.launch {
             val nuevo = MaterialEntity(
@@ -154,12 +95,12 @@ class InventarioViewModel @Inject constructor(  // ← MODIFICADO: @Inject en co
         // TODO: Implementar eliminación en Room y Supabase
     }
 
-    // 10. Autenticación de usuario (login)
+    // 10. Autenticacion de usuario (login)
     fun login(user: String, password: String) {
         // TODO: Implementar autenticación con Supabase
     }
 
-    // 11. Cerrar sesión
+    // 11. Cerrar sesion
     fun cerrarSesion() {
         // TODO: Implementar cierre de sesión
     }

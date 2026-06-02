@@ -73,9 +73,9 @@ class CatalogoViewModel(
 
             try {
                 val llaveros = apiService.getLlaveros()
-                _errorMessage.value = "Conexión exitosa! ${llaveros.size} llaveros encontrados"
+                _errorMessage.value = "Conexion exitosa! ${llaveros.size} llaveros encontrados"
             } catch (e: Exception) {
-                _errorMessage.value = "Error de conexión: ${e.message}"
+                _errorMessage.value = "Error de conexion: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
