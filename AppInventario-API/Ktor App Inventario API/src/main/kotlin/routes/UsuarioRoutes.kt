@@ -40,7 +40,6 @@ fun Route.usuarioRoutes() {
             } catch (e: Exception) {
                 call.respondText("Error al consultar la BD: ${e.localizedMessage}", status = HttpStatusCode.InternalServerError)
             }
-            call.respond(usuarios)
         }
 
         // Obtener los usuarios por ID

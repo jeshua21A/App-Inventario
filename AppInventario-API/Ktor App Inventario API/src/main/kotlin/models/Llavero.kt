@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 data class Llavero(
     val id: Int,
     val nombre: String,
-    val description: String,
+    val descripcion: String,
     val precioVenta: Double
 )
