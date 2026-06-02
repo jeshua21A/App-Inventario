@@ -1,6 +1,7 @@
 package com.example
 
 import com.example.routes.llaveroRoutes
+import com.example.routes.loginRoutes
 import com.example.routes.materialRoutes
 import com.example.routes.recetaRoutes
 import com.example.routes.usuarioRoutes
@@ -14,6 +15,7 @@ fun Application.configureRouting() {
             call.respondText("API del Sistema App Inventario en Funcionamiento")
         }
         // Módulos de los endpoints
+        loginRoutes()
         llaveroRoutes()
         materialRoutes()
         recetaRoutes()

@@ -1,14 +1,7 @@
 package com.example.routes
 
 import com.example.database.dbQuery
-import com.example.models.Llavero
-import com.example.models.Receta
 import com.example.models.Usuario
-import com.example.models.supabase.LlaveroTable
-import com.example.models.supabase.LlaveroTable.descripcion
-import com.example.models.supabase.LlaveroTable.id
-import com.example.models.supabase.LlaveroTable.nombre
-import com.example.models.supabase.LlaveroTable.precioVenta
 import com.example.models.supabase.UsuarioTable
 import com.example.security.BCryptUtils
 import io.ktor.http.HttpStatusCode
@@ -26,10 +19,7 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
-import kotlin.String
 import kotlin.text.toIntOrNull
-
-val listaUsuarios = mutableListOf<Usuario>()
 
 fun Route.usuarioRoutes() {
     route("/usuarios") {
@@ -94,30 +84,31 @@ fun Route.usuarioRoutes() {
                     } get UsuarioTable.id
                 }
 
-                call.respond(HttpStatusCode.Created, input.copy(id = nuevoId))
+                call.respond(HttpStatusCode.Created, input.copy(id = nuevoId, password = passwordCifrado))
             } catch (e: Exception) {
                 call.respondText("Cuerpo JSON inválido o incompleto: ${e.localizedMessage}", status = HttpStatusCode.BadRequest)
             }
         }
 
-        // Actualizar un llavero
+        // Actualizar un usuario
         put("/{id}") {
             val idParam = call.parameters["id"]?.toIntOrNull()
                 ?: return@put call.respondText("ID inválido", status = HttpStatusCode.BadRequest)
 
             try {
                 val input = call.receive<Usuario>()
+                val passwordCifrado = BCryptUtils.hashPassword(input.password)
 
                 val filasActualizadas = dbQuery {
                     UsuarioTable.update({ UsuarioTable.id eq idParam }) { statement ->
                         statement[username] = input.username
-                        statement[password] = input.password
+                        statement[password] = passwordCifrado
                         statement[esAdmin] = input.esAdmin
                     }
                 }
 
                 if (filasActualizadas > 0) {
-                    call.respond(HttpStatusCode.OK, input.copy(id = idParam))
+                    call.respond(HttpStatusCode.OK, input.copy(id = idParam, password = passwordCifrado))
                 } else {
                     call.respondText("No se encontró ningún usuario con el ID provisto", status = HttpStatusCode.NotFound)
                 }
@@ -126,7 +117,7 @@ fun Route.usuarioRoutes() {
             }
         }
 
-        // Borrar un llavero
+        // Borrar un usuario
         delete("/{id}") {
             val idParam = call.parameters["id"]?.toIntOrNull()
                 ?: return@delete call.respondText("ID inválido", status = HttpStatusCode.BadRequest)
