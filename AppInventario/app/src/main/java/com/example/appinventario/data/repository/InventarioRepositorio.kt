@@ -2,7 +2,9 @@ package com.example.appinventario.data.repository
 
 import com.example.appinventario.data.local.dao.InventarioDao
 import com.example.appinventario.data.local.entities.MaterialEntity
+import com.example.appinventario.data.local.entities.UsuarioEntity
 import com.example.appinventario.data.network.InventarioApiService
+import com.example.appinventario.data.remote.dto.LoginDto
 import com.example.appinventario.data.remote.mapper.toEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -24,5 +26,17 @@ class InventarioRepositorio @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    suspend fun login(
+        username: String,
+        password: String
+    ): UsuarioEntity {
+        return ApiClient.api.login(
+            LoginDto(
+                username = username,
+                password = password
+            )
+        ).toEntity()
     }
 }

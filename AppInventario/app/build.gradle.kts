@@ -83,6 +83,8 @@ dependencies {
     ksp(libs.dagger.hilt.compiler)
 
     // Retrofit & OkHttp (Networking)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
     //implementation(libs.retrofit)
     //implementation(libs.retrofit.gson)
     //implementation(libs.okhttp.logging)
