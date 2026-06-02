@@ -7,7 +7,12 @@ import com.example.appinventario.data.local.entities.LlaveroEntity
 import com.example.appinventario.data.local.entities.MaterialEntity
 import com.example.appinventario.data.local.entities.RecetaEntity
 import com.example.appinventario.data.local.entities.UsuarioEntity
+<<<<<<< HEAD
 import com.example.appinventario.data.repository.InventarioRepositorio
+=======
+import com.example.appinventario.data.network.InventarioApiService
+import com.example.appinventario.data.remote.mapper.toEntity
+>>>>>>> 82627cc9f1e63429e2150a0805d0884f000a183c
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,20 +28,31 @@ sealed class AuthState {
     object CredencialesInvalidas : AuthState()
 }
 
+<<<<<<< HEAD
 
 class InventarioViewModel(
     private val inventarioDao: InventarioDao,
     private val repository: InventarioRepositorio
 ): ViewModel() {
+=======
+class InventarioViewModel(
+    private val inventarioDao: InventarioDao,
+    private val apiService: InventarioApiService
+) : ViewModel() {
+>>>>>>> 82627cc9f1e63429e2150a0805d0884f000a183c
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
+<<<<<<< HEAD
     private val _loginError = MutableStateFlow<String?>(null)
     val loginError = _loginError.asStateFlow()
 
 
     // 1. Observer todos los materiales para confirmar cuando habra algún cambio
+=======
+    // 1. Observer todos los materiales para confirmar cuando habra algun cambio
+>>>>>>> 82627cc9f1e63429e2150a0805d0884f000a183c
     val listaMateriales: StateFlow<List<MaterialEntity>> = inventarioDao.getAllMateriales()
         .stateIn(
             scope = viewModelScope,
@@ -44,7 +60,7 @@ class InventarioViewModel(
             initialValue = emptyList()
         )
 
-    // 2. Función para insertar un nuevo material
+    // 2. Funcion para insertar un nuevo material
     fun agregarMaterial(nombre: String, stock: Double, unidad: String, minimo: Double, precio: Double){
         viewModelScope.launch {
             val nuevo = MaterialEntity(
@@ -68,10 +84,12 @@ class InventarioViewModel(
 
     // 4. Actualizar un material existente
     fun actualizarMaterial(material: MaterialEntity) {
+        // TODO: Implementar actualización en Room y Supabase
     }
 
     // 5. Eliminar un material
     fun eliminarMaterial(material: MaterialEntity) {
+        // TODO: Implementar eliminación en Room y Supabase
     }
 
     // 6. Obtener todos los llaveros (catalogo)
@@ -84,16 +102,20 @@ class InventarioViewModel(
 
     // 7. Agregar un nuevo llavero
     fun agregarLlavero(nombre: String, descripcion: String, precioVenta: Double) {
+        // TODO: Implementar creación en Room y Supabase
     }
 
     // 8. Actualizar un llavero existente
     fun actualizarLlavero(llavero: LlaveroEntity) {
+        // TODO: Implementar actualización en Room y Supabase
     }
 
     // 9. Eliminar un llavero
     fun eliminarLlavero(llavero: LlaveroEntity) {
+        // TODO: Implementar eliminación en Room y Supabase
     }
 
+<<<<<<< HEAD
     // 10. Autenticación de usuario (login)
     fun login(user: String, password:String) {
         when {
@@ -128,33 +150,46 @@ class InventarioViewModel(
                     "Usuario o contraseña incorrectos"
             }
         }
+=======
+    // 10. Autenticacion de usuario (login)
+    fun login(user: String, password: String) {
+        // TODO: Implementar autenticación con Supabase
+>>>>>>> 82627cc9f1e63429e2150a0805d0884f000a183c
     }
 
-    // 11. Cerrar sesión
+    // 11. Cerrar sesion
     fun cerrarSesion() {
+<<<<<<< HEAD
         _authState.value = AuthState.Idle
+=======
+        // TODO: Implementar cierre de sesión
+>>>>>>> 82627cc9f1e63429e2150a0805d0884f000a183c
     }
 
     // 12. Obtener los materiales que necesita un llavero (receta)
     fun getMaterialesDeUnLlavero(llaveroId: Int) = flow {
         emit(emptyList<MaterialEntity>())
+        // TODO: Implementar consulta de recetas
     }
 
     // 13. Agregar un ingrediente a la receta de un llavero
     fun agregarIngredienteReceta(llaveroId: Int, materialId: Int, cantidad: Double) {
-
+        // TODO: Implementar creación de recetas
     }
 
     // 14. Eliminar un ingrediente de la receta de un llavero
     fun eliminarIngredienteReceta(receta: RecetaEntity) {
+        // TODO: Implementar eliminación de recetas
     }
 
     // 15. Verificar si hay suficiente stock para producir un llavero
     fun verificarStockParaLlavero(llaveroId: Int): Boolean {
         return TODO("Provide the return value")
+        // TODO: Implementar verificación de stock
     }
 
     // 16. Producir un llavero (descontar stock de materiales)
     fun producirLlavero(llaveroId: Int) {
+        // TODO: Implementar producción y descuento de stock
     }
 }
