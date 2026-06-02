@@ -65,6 +65,12 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.navigation.compose)
 
+    //koin
+    implementation("io.insert-koin:koin-android:3.5.3")
+    implementation("io.insert-koin:koin-androidx-compose:3.5.3")
+    implementation("io.insert-koin:koin-core:3.5.3")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
     // Room (Persistencia)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

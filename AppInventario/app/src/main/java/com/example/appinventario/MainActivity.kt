@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appinventario.data.local.database.AppDatabase
+import com.example.appinventario.ui.screens.CatalogoScreen
 import com.example.appinventario.ui.screens.MaterialesScreen
 import com.example.appinventario.ui.theme.AppInventarioTheme
 import com.example.appinventario.ui.viewmodels.InventarioViewModel
@@ -23,34 +24,32 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Nota: Ya no necesitamos crear manualmente la base de datos, DAO ni Factory
+        // Koin se encarga de esto automáticamente
+        /*
         // 1. Obtener la instancia de la base de datos nativa SQLite
         val database = AppDatabase.getDatabase(this)
         // 2. Obtener el DAO (el mensajero entre Kotlin y SQL
         val dao = database.inventarioDao()
         // 3. Crear la "Fábrica" pasándole el DAO
         val factory = InventarioViewModelFactory(dao)
+        */
 
         enableEdgeToEdge()
         setContent {
             AppInventarioTheme {
+                // Mostrar CatalogoScreen (con Koin, se obtiene automáticamente)
+                CatalogoScreen()
+                // MaterialesScreen(viewModel = inventarioViewModel)
+
+                /*
+                // Código original comentado:
                 // Creamos o recuperamos el ViewModel
-                val inventarioViewModel: InventarioViewModel = viewModel( factory = factory)
-                //--- Ejemplos para probar screen por screen:
-                //MaterialesScreen(viewModel = inventarioViewModel)
-
-                //viewModel = inventarioViewModel,
-                //navController = rememberNavController()
-
-                //--Probar proyecto completo
-                // Requiere los siguientes cambios adicionales:
-                // 1. Crear las rutas en AppNavGraph.kt
-                // 2. Conectar LoginScreen con viewModel.login() y los demas screens
-                // 3. Crear Pantallas faltantes
-                //
-                // AppNavGraph(viewModel = inventarioViewModel)
+                // val inventarioViewModel: InventarioViewModel = viewModel( factory = factory)
 
                 // Llamamos a la pantalla principal de Admin como prueba
-                MaterialesScreen(viewModel = inventarioViewModel)
+                // MaterialesScreen(viewModel = inventarioViewModel)
+                */
             }
         }
     }

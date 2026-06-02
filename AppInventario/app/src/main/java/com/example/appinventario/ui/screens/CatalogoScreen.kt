@@ -7,17 +7,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,43 +28,21 @@ import com.example.appinventario.data.local.entities.LlaveroEntity
 import com.example.appinventario.ui.components.*
 import com.example.appinventario.ui.theme.AppColors
 import com.example.appinventario.ui.theme.AppInventarioTheme
-import com.example.appinventario.ui.viewmodels.InventarioViewModel
+import com.example.appinventario.ui.viewmodels.CatalogoViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogoScreen(
-    // TODO: Cambiar: viewModel debe ser obligatorio cuando se implemente en la app real
-    viewModel: InventarioViewModel? = null,
-
-    // TODO: Cambiar: navController debe venir de la navegación real
-    // TODO: Quitar: rememberNavController es solo para Preview
-    navController: NavController = rememberNavController(),
-
-    // TODO: Cambiar: listaLlaveros debe venir del ViewModel real
-    // TODO: Quitar: el valor por defecto null es solo para Preview
-    listaLlaveros: StateFlow<List<LlaveroEntity>>? = null
+    viewModel: CatalogoViewModel = koinViewModel()
 ) {
-    // TODO: Quitar: estos datos simulados SOLO son para Preview
-    // TODO: Reemplazar: cuando viewModel no sea null, usar viewModel.listaLlaveros
-    val previewData = remember {
-        MutableStateFlow(
-            listOf(
-                LlaveroEntity(1, "Llavero de cuero", "Llavero de cuero personalizado", 50.50),
-                LlaveroEntity(2, "Llavero metálico", "Llavero de metal grabado", 45.00),
-                LlaveroEntity(3, "Llavero acrílico", "Llavero acrílico transparente", 35.50),
-                LlaveroEntity(4, "Llavero madera", "Llavero artesanal de madera", 60.00),
-                LlaveroEntity(5, "Llavero con iniciales", "Llavero de cuero con iniciales grabadas", 55.00),
-                LlaveroEntity(6, "Llavero multifuncional", "Llavero con abrebotellas y destapador", 40.00)
-            )
-        )
-    }
-
-    // TODO: Cambiar: en la app real, usar solo viewModel.listaLlaveros
-    val llaverosFlow = listaLlaveros ?: previewData
-    val llaveros by llaverosFlow.collectAsState()
+    // Estados del ViewModel
+    val listaLlaveros by viewModel.listaLlaveros.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     var busquedaTexto by remember { mutableStateOf("") }
     var llaveroSeleccionado by remember { mutableStateOf<LlaveroEntity?>(null) }
@@ -76,16 +50,23 @@ fun CatalogoScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val llaverosVisibles = if (busquedaTexto.isBlank()) llaveros
-    else llaveros.filter {
+    // Cargar datos al iniciar la pantalla
+    LaunchedEffect(Unit) {
+        if (listaLlaveros.isEmpty()) {
+            viewModel.loadLlaverosFromCloud()
+        }
+    }
+
+    // Filtrar llaveros según búsqueda
+    val llaverosVisibles = if (busquedaTexto.isBlank()) listaLlaveros
+    else listaLlaveros.filter {
         it.nombre.contains(busquedaTexto, ignoreCase = true) ||
                 it.descripcion.contains(busquedaTexto, ignoreCase = true)
     }
 
-    // TODO: Cambiar: viewModel.cerrarSesion() debe llamar al método real
-    // TODO: Quitar: el operador ?. es solo porque viewModel es opcional en Preview
+    // Opciones del menú lateral (cliente)
     val opcionesMenu = getOpcionesCliente(
-        onCerrarSesion = { viewModel?.cerrarSesion() ?: Unit }
+        onCerrarSesion = { /* TODO: Implementar cierre de sesión */ }
     )
 
     ModalNavigationDrawer(
@@ -144,9 +125,31 @@ fun CatalogoScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                if (llaverosVisibles.isEmpty()) {
+                // Mostrar mensaje de error si existe
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = AppColors.ErrorRed,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // Mostrar loading
+                if (isLoading && listaLlaveros.isEmpty()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Sin productos disponibles.", color = AppColors.BrownSub, fontSize = 15.sp)
+                        CircularProgressIndicator()
+                    }
+                } else if (llaverosVisibles.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Sin productos disponibles.", color = AppColors.BrownSub, fontSize = 15.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { viewModel.loadLlaverosFromCloud() }) {
+                                Text("Cargar desde la nube")
+                            }
+                        }
                     }
                 } else {
                     LazyColumn(
@@ -185,7 +188,7 @@ fun CatalogoScreen(
         }
     }
 
-    // Dialogo de detalles del producto
+    // Diálogo de detalles del producto
     if (llaveroSeleccionado != null) {
         ProductoDetallesDialog(
             llavero = llaveroSeleccionado!!,
@@ -194,8 +197,7 @@ fun CatalogoScreen(
     }
 }
 
-//  PREVIEW DE LA PANTALLA
-
+// PREVIEW DE LA PANTALLA
 @Preview(
     name = "Catalogo Screen Preview - Menu Abierto",
     showBackground = true,
@@ -204,7 +206,6 @@ fun CatalogoScreen(
 @Composable
 private fun CatalogoScreenPreviewMenuAbierto() {
     AppInventarioTheme {
-        // Forzar drawer abierto para Preview
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
 
         ModalNavigationDrawer(
@@ -226,7 +227,6 @@ private fun CatalogoScreenPreviewMenuAbierto() {
 }
 
 // PREVIEW DEL DIALOG
-
 @Preview(
     name = "Dialogo Detalles Preview",
     showBackground = true
