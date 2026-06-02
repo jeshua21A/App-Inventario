@@ -44,7 +44,6 @@ fun Route.recetaRoutes() {
             } catch (e: Exception) {
                 call.respondText("Error al consultar la BD: ${e.localizedMessage}", status = HttpStatusCode.InternalServerError)
             }
-            call.respond(recetas)
         }
 
         // Obtener las recetas por ID

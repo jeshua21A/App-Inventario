@@ -31,7 +31,6 @@ fun Route.materialRoutes() {
             } catch (e: Exception) {
                 call.respondText("Error al consultar la BD: ${e.localizedMessage}", status = HttpStatusCode.InternalServerError)
             }
-            call.respond(materiales)
         }
 
         // Obtener los materiales por ID
