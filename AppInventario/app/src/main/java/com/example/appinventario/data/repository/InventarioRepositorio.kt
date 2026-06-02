@@ -1,5 +1,6 @@
 package com.example.appinventario.data.repository
 
+import com.example.appinventario.data.network.ApiClient
 import com.example.appinventario.data.local.dao.InventarioDao
 import com.example.appinventario.data.local.entities.MaterialEntity
 import com.example.appinventario.data.local.entities.UsuarioEntity
@@ -32,7 +33,7 @@ class InventarioRepositorio @Inject constructor(
         username: String,
         password: String
     ): UsuarioEntity {
-        return ApiClient.api.login(
+        return apiService.login(
             LoginDto(
                 username = username,
                 password = password
