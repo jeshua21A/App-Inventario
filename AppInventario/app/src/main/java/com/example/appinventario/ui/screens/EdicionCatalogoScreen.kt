@@ -114,7 +114,7 @@ fun EdicionCatalogoScreen(
                         .background(AppColors.Cream)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.catalogo_label),
+                        painter = painterResource(id = R.drawable.edicion_catalogo_flag),
                         contentDescription = "Edicion Catalogo",
                         modifier = Modifier.fillMaxWidth().height(75.dp),
                         contentScale = ContentScale.FillBounds
