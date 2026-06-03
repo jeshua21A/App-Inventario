@@ -51,7 +51,7 @@ class InventarioViewModel(
 
     // 1. Observer todos los materiales para confirmar cuando habra algún cambio
     */
-    
+
     // 1. Observer todos los materiales para confirmar cuando habra algun cambio
     val listaMateriales: StateFlow<List<MaterialEntity>> = inventarioDao.getAllMateriales()
         .stateIn(
