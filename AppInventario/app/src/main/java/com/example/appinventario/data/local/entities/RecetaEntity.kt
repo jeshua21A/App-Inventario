@@ -7,7 +7,8 @@ import androidx.room.Entity
     primaryKeys = ["llaveroId", "materialId"]
 )
 data class RecetaEntity(
-    val llaveroId: Int,
-    val materialId: Int,
-    val cantidadUsada: Double
+    val id: Int = 0,
+    val idLlavero: Int,
+    val idMaterial: Int,
+    val cantidad: Double
 )

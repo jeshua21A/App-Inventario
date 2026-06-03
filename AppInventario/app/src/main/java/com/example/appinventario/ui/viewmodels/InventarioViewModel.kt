@@ -7,6 +7,7 @@ import com.example.appinventario.data.local.entities.LlaveroEntity
 import com.example.appinventario.data.local.entities.MaterialEntity
 import com.example.appinventario.data.local.entities.RecetaEntity
 import com.example.appinventario.data.local.entities.UsuarioEntity
+import com.example.appinventario.data.repository.InventarioRepositorio
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,10 +24,17 @@ sealed class AuthState {
 }
 
 
-class InventarioViewModel(private val inventarioDao: InventarioDao): ViewModel() {
+class InventarioViewModel(
+    private val inventarioDao: InventarioDao,
+    private val repository: InventarioRepositorio
+): ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
+    private val _loginError = MutableStateFlow<String?>(null)
+    val loginError = _loginError.asStateFlow()
+
 
     // 1. Observer todos los materiales para confirmar cuando habra algún cambio
     val listaMateriales: StateFlow<List<MaterialEntity>> = inventarioDao.getAllMateriales()
@@ -87,12 +95,44 @@ class InventarioViewModel(private val inventarioDao: InventarioDao): ViewModel()
     }
 
     // 10. Autenticación de usuario (login)
-    fun login(user: String, password: String) {
+    fun login(user: String, password:String) {
+        when {
+            user.isBlank() -> {
+                _loginError.value =
+                    "El usuario es obligatorio"
+                return
+            }
+
+            password.isBlank() -> {
+                _loginError.value =
+                    "La contraseña es obligatoria"
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            try {
+                val usuario =
+                    repository.login(
+                        user,
+                        password
+                    )
+
+                _loginError.value = null
+                _authState.value = AuthState.Autenticado(usuario)
+            } catch (e: Exception) {
+                _authState.value =
+                    AuthState.CredencialesInvalidas
+
+                _loginError.value =
+                    "Usuario o contraseña incorrectos"
+            }
+        }
     }
 
     // 11. Cerrar sesión
     fun cerrarSesion() {
-
+        _authState.value = AuthState.Idle
     }
 
     // 12. Obtener los materiales que necesita un llavero (receta)

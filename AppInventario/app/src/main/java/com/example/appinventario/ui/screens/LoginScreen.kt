@@ -13,21 +13,30 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import com.example.appinventario.R
 import com.example.appinventario.ui.theme.AppColors
 import com.example.appinventario.ui.theme.AppInventarioTheme
+import com.example.appinventario.ui.viewmodels.InventarioViewModel
+import com.example.appinventario.ui.viewmodels.AuthState
 
 @Composable
 fun LoginScreen(
-    //TODO: Cambiar parametro para que reciba el viewmodel
-    onLoginExitoso: () -> Unit = {}
+    viewModel: InventarioViewModel,
+    onLoginExitoso: () -> Unit
 ) {
     //- Dejar usuario y contraseña
     var usuario by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
-    //TODO: quitar error general y reemplazarlo por otros parametros de viewmodel
-    //TODO: Incluir authState
-    var errorGeneral by remember { mutableStateOf<String?>(null) }
+
+    val authState by viewModel.authState.collectAsState()
+    val errorGeneral by viewModel.loginError.collectAsState()
+
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Autenticado) {
+            onLoginExitoso()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -56,7 +65,6 @@ fun LoginScreen(
                 value = usuario,
                 onValueChange = {
                     usuario = it
-                    errorGeneral = null
                 },
                 label = { Text("Usuario") },
                 modifier = Modifier.fillMaxWidth(),
@@ -83,7 +91,6 @@ fun LoginScreen(
                 onValueChange = {
                     contrasena = it
                     //TODO: Error generico, cambiar
-                    errorGeneral = null
                 },
                 label = { Text("Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
@@ -122,19 +129,10 @@ fun LoginScreen(
             Button(
                 //-Logica de Boton solo de prueba, reemplazarlo por funcion del viewmodel
                 onClick = {
-                    when {
-                        //TODO: error generico, cambiar
-                        usuario.isBlank() -> errorGeneral = "El usuario es obligatorio"
-                        contrasena.isBlank() -> errorGeneral = "La contraseña es obligatoria"
-                        else -> {
-                            if (usuario == "admin" && contrasena == "1234") {
-                                onLoginExitoso()
-                            } else {
-                                //TODO: Error generico, cambiar
-                                errorGeneral = "Usuario o contraseña incorrectos"
-                            }
-                        }
-                    }
+                    viewModel.login(
+                        usuario,
+                        contrasena
+                    )
                 },
                 modifier = Modifier
                     .width(200.dp)
@@ -160,6 +158,6 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     AppInventarioTheme {
-        LoginScreen()
+        Text("Preview Login")
     }
 }

@@ -46,10 +46,10 @@ interface InventarioDao {
     // Obtener los materiales de un llavero específico
     @Query("""
         SELECT material.* FROM material
-        INNER JOIN receta ON material.id = receta.materialId
-        WHERE receta.llaveroId = :llaveroId
+        INNER JOIN receta ON material.id = receta.idMaterial
+        WHERE receta.idLlavero = :idLlavero
     """)
-    fun getMaterialesDeUnLlavero(llaveroId: Int): Flow<List<MaterialEntity>>
+    fun getMaterialesDeUnLlavero(idLlavero: Int): Flow<List<MaterialEntity>>
 
     // --- Operaciones con Usuario ---
 
