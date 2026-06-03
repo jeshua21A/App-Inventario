@@ -4,8 +4,7 @@ import com.example.appinventario.data.remote.dto.*
 import retrofit2.http.*
 
 interface InventarioApiService {
-<<<<<<< HEAD
-    //LLAVEROS
+    /*//LLAVEROS
     @GET("llaveros")
     suspend fun getLlaveros(): List<LlaveroDto>
 
@@ -77,8 +76,8 @@ interface InventarioApiService {
         @Path("id") id: Int
     ): UsuarioDto
 
-    @POST("usuarios")
-=======
+    @POST("usuarios")*/
+
     @GET("llavero")
     suspend fun getLlaveros(): List<LlaveroDto>
 
@@ -101,7 +100,6 @@ interface InventarioApiService {
     suspend fun getUsuarios(): List<UsuarioDto>
 
     @POST("usuario")
->>>>>>> 82627cc9f1e63429e2150a0805d0884f000a183c
     suspend fun createUsuario(@Body usuario: UsuarioDto): UsuarioDto
 
     @PUT("usuarios/{id}")
