@@ -30,7 +30,6 @@ fun Route.llaveroRoutes() {
                 call.respondText("Error al consultar la BD: ${e.localizedMessage}", status = HttpStatusCode.InternalServerError)
             }
         }
-
         // Obtener los llaveros por ID
         get("/{id}") {
             val idParam = call.parameters["id"]?.toIntOrNull()
