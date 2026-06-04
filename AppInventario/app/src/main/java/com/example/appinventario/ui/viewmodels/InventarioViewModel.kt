@@ -23,11 +23,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 // Estado de autenticación
-sealed class AuthState {
-    object Idle : AuthState()
-    data class Autenticado(val usuario: UsuarioEntity) : AuthState()
-    object CredencialesInvalidas : AuthState()
-}
 
 /*
 class InventarioViewModel(
@@ -40,17 +35,6 @@ class InventarioViewModel(
     private val inventarioDao: InventarioDao,
     private val apiService: InventarioApiService
 ) : ViewModel() {
-
-    private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
-    val authState: StateFlow<AuthState> = _authState.asStateFlow()
-
-    /*
-    private val _loginError = MutableStateFlow<String?>(null)
-    val loginError = _loginError.asStateFlow()
-
-
-    // 1. Observer todos los materiales para confirmar cuando habra algún cambio
-    */
 
     // 1. Observer todos los materiales para confirmar cuando habra algun cambio
     val listaMateriales: StateFlow<List<MaterialEntity>> = inventarioDao.getAllMateriales()
@@ -168,7 +152,6 @@ class InventarioViewModel(
     // 12. Obtener los materiales que necesita un llavero (receta)
     fun getMaterialesDeUnLlavero(llaveroId: Int) = flow {
         emit(emptyList<MaterialEntity>())
-        // TODO: Implementar consulta de recetas
     }
 
     // 13. Agregar un ingrediente a la receta de un llavero
@@ -183,8 +166,7 @@ class InventarioViewModel(
 
     // 15. Verificar si hay suficiente stock para producir un llavero
     fun verificarStockParaLlavero(llaveroId: Int): Boolean {
-        return TODO("Provide the return value")
-        // TODO: Implementar verificación de stock
+        return false
     }
 
     // 16. Producir un llavero (descontar stock de materiales)

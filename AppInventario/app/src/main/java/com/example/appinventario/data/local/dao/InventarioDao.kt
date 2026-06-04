@@ -35,6 +35,9 @@ interface InventarioDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLlavero(llavero: LlaveroEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLlaveros(llavero: List<LlaveroEntity>)
+
     @Query("SELECT * FROM llavero")
     fun getAllLlaveros(): Flow<List<LlaveroEntity>>
 

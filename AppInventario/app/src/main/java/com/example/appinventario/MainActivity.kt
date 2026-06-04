@@ -13,13 +13,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.appinventario.data.local.database.AppDatabase
+import com.example.appinventario.navigation.AppNavGraph
 import com.example.appinventario.ui.screens.CatalogoScreen
+import com.example.appinventario.ui.screens.EdicionCatalogoScreen
 import com.example.appinventario.ui.screens.MaterialesScreen
 import com.example.appinventario.ui.screens.RecetaLlaverosScreen
 import com.example.appinventario.ui.theme.AppInventarioTheme
+import com.example.appinventario.ui.viewmodels.AuthViewModel
 import com.example.appinventario.ui.viewmodels.InventarioViewModel
 import com.example.appinventario.ui.viewmodels.InventarioViewModelFactory
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,19 +44,19 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AppInventarioTheme {
-                // Mostrar CatalogoScreen (con Koin, se obtiene automáticamente)
-                //CatalogoScreen()
-                // MaterialesScreen(viewModel = inventarioViewModel)
-                //Mostrar pantalla de recetas
-                RecetaLlaverosScreen()
-                /*
-                // Código original comentado:
-                // Creamos o recuperamos el ViewModel
-                // val inventarioViewModel: InventarioViewModel = viewModel( factory = factory)
+                // Obtenemos los ViewModels desde Koin
+                val authViewModel: AuthViewModel = koinViewModel()
+                val inventarioViewModel: InventarioViewModel =
+                    koinViewModel()
 
-                // Llamamos a la pantalla principal de Admin como prueba
-                // MaterialesScreen(viewModel = inventarioViewModel)
-                */
+                val navController = rememberNavController()
+
+                // Usamos el NavGraph para controlar qué pantalla mostrar
+                AppNavGraph(
+                    authViewModel = authViewModel,
+                    inventarioViewModel = inventarioViewModel,
+                    navController = navController
+                )
             }
         }
     }

@@ -3,6 +3,7 @@ package com.example.appinventario.di
 import com.example.appinventario.data.local.database.AppDatabase
 import com.example.appinventario.data.network.InventarioApiService
 import com.example.appinventario.data.repository.InventarioRepositorio
+import com.example.appinventario.ui.viewmodels.AuthViewModel
 import com.example.appinventario.ui.viewmodels.InventarioViewModel
 import com.example.appinventario.ui.viewmodels.CatalogoViewModel
 import com.example.appinventario.ui.viewmodels.RecetasViewModel
@@ -93,5 +94,10 @@ val appModule = module {
             inventarioDao = get(),
             apiService = get()
         )
+    }
+
+    // Auth ViewModel
+    viewModel {
+        AuthViewModel(repositorio = get())
     }
 }

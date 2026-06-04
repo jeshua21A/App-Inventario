@@ -31,7 +31,7 @@ import com.example.appinventario.ui.screens.Edicion.ProductoCardEditable
 import com.example.appinventario.ui.screens.Edicion.LlaveroFormDialog
 import com.example.appinventario.ui.theme.AppColors
 import com.example.appinventario.ui.theme.AppInventarioTheme
-import com.example.appinventario.ui.viewmodels.InventarioViewModel
+import com.example.appinventario.ui.viewmodels.CatalogoViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -39,36 +39,11 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EdicionCatalogoScreen(
-    // TODO: Cambiar: viewModel debe ser obligatorio cuando se implemente en la app real
-    // TODO: Quitar: el valor por defecto null es solo para Preview
-    viewModel: InventarioViewModel? = null,
-
-    // TODO: Cambiar: navController debe venir de la navegación real
-    // TODO: Quitar: rememberNavController es solo para Preview
-    navController: NavController = rememberNavController(),
-
-    // TODO: Cambiar: listaLlaveros debe venir del ViewModel real
-    // TODO: Quitar: el valor por defecto null es solo para Preview
-    listaLlaveros: StateFlow<List<LlaveroEntity>>? = null
+    navController: NavController,
+    viewModel: CatalogoViewModel
 ) {
-    // TODO: Quitar: estos datos simulados SOLO son para Preview
-    // TODO: Reemplazar: cuando viewModel no sea null, usar viewModel.listaLlaveros
-    val previewData = remember {
-        MutableStateFlow(
-            listOf(
-                LlaveroEntity(1, "Llavero de cuero", "Llavero de cuero personalizado", 50.50),
-                LlaveroEntity(2, "Llavero metálico", "Llavero de metal grabado", 45.00),
-                LlaveroEntity(3, "Llavero acrílico", "Llavero acrílico transparente", 35.50),
-                LlaveroEntity(4, "Llavero madera", "Llavero artesanal de madera", 60.00),
-                LlaveroEntity(5, "Llavero con iniciales", "Llavero de cuero con iniciales grabadas", 55.00),
-                LlaveroEntity(6, "Llavero multifuncional", "Llavero con abrebotellas y destapador", 40.00)
-            )
-        )
-    }
 
-    // TODO: Cambiar: en la app real, usar solo viewModel.listaLlaveros
-    val llaverosFlow = listaLlaveros ?: previewData
-    val llaveros by llaverosFlow.collectAsState()
+    val llaveros by viewModel.listaLlaveros.collectAsState()
 
     var busquedaTexto by remember { mutableStateOf("") }
     var llaveroEditando by remember { mutableStateOf<LlaveroEntity?>(null) }
@@ -83,14 +58,16 @@ fun EdicionCatalogoScreen(
                 it.descripcion.contains(busquedaTexto, ignoreCase = true)
     }
 
-    // TODO: Cambiar: viewModel.cerrarSesion() debe llamar al método real
-    // TODO: Quitar: el operador ?. es solo porque viewModel es opcional en Preview
     val opcionesMenu = getOpcionesAdmin(
         onNavigateToCatalogo = { navController.navigate(Rutas.CATALOGO) },
-        onNavigateToEdicionCatalogo = { /* ya estás aquí */ },
+        onNavigateToEdicionCatalogo = { scope.launch { drawerState.close() } },
         onNavigateToMateriales = { navController.navigate(Rutas.MATERIALES) },
         onNavigateToRecetas = { navController.navigate(Rutas.RECETA_LLAVEROS) },
-        onCerrarSesion = { viewModel?.cerrarSesion() ?: Unit }
+        onCerrarSesion = {
+            navController.navigate(Rutas.LOGIN) {
+                popUpTo(0)
+            }
+        }
     )
 
     ModalNavigationDrawer(
@@ -205,7 +182,6 @@ fun EdicionCatalogoScreen(
         }
     }
 
-    // TODO: Cambiar: llamar a los métodos reales del ViewModel cuando estén implementados
     if (llaveroEditando != null || mostrarDialogoAgregar) {
         LlaveroFormDialog(
             titulo = if (llaveroEditando != null) "Editar Producto" else "Nuevo Producto",
@@ -213,67 +189,37 @@ fun EdicionCatalogoScreen(
             descInicial = llaveroEditando?.descripcion ?: "",
             precioInicial = llaveroEditando?.precioVenta?.toString() ?: "",
             onGuardar = { nombre, descripcion, precio ->
+                val precioDouble = precio ?: 0.0
+
                 if (llaveroEditando != null) {
-                    // TODO: Reemplazar con viewModel.actualizarLlavero()
-                    viewModel?.actualizarLlavero(llaveroEditando!!.copy(nombre = nombre, descripcion = descripcion, precioVenta = precio))
+                    viewModel.agregarLlaveroNuevo(
+                        llaveroEditando!!.copy(
+                            nombre = nombre,
+                            descripcion = descripcion,
+                            precioVenta = precioDouble
+                        )
+                    )
                 } else {
-                    // TODO: Reemplazar con viewModel.agregarLlavero()
-                    viewModel?.agregarLlavero(nombre, descripcion, precio)
+                    viewModel.agregarLlaveroNuevo(
+                        LlaveroEntity(
+                            id = 0,
+                            nombre = nombre,
+                            descripcion = descripcion,
+                            precioVenta = precioDouble
+                        )
+                    )
                 }
                 llaveroEditando = null
                 mostrarDialogoAgregar = false
             },
             onEliminar = if (llaveroEditando != null) {
                 {
-                    // TODO: Reemplazar con viewModel.eliminarLlavero()
-                    viewModel?.eliminarLlavero(llaveroEditando!!)
                     llaveroEditando = null
                 }
             } else null,
             onCancelar = {
                 llaveroEditando = null
                 mostrarDialogoAgregar = false
-            }
-        )
-    }
-}
-
-// PREVIEW DE LA PANTALLA
-
-// TODO: Este Preview es solo para diseño visual
-// TODO: Al implementar el ViewModel real, este Preview seguirá funcionando porque los parámetros son opcionales
-@Preview(
-    name = "Edicion Catalogo Screen Preview",
-    showBackground = true,
-    showSystemUi = true
-)
-@Composable
-private fun EdicionCatalogoScreenPreview() {
-    AppInventarioTheme {
-        // TODO: En Preview no se necesita ViewModel, se usan los datos simulados automáticamente
-        EdicionCatalogoScreen()
-    }
-}
-
-// PREVIEW DEL FORMULARIO
-@Preview(
-    name = "Llavero Form Dialog Preview",
-    showBackground = true
-)
-@Composable
-private fun LlaveroFormDialogPreview() {
-    AppInventarioTheme {
-        LlaveroFormDialog(
-            titulo = "Editar Producto",
-            nombreInicial = "Llavero de cuero",
-            descInicial = "Llavero de cuero personalizado con letras grabadas",
-            precioInicial = "50.50",
-            onGuardar = { nombre, descripcion, precio ->
-                println("Guardar: $nombre - $precio")
-            },
-            onEliminar = null,
-            onCancelar = {
-                println("Cancelar")
             }
         )
     }

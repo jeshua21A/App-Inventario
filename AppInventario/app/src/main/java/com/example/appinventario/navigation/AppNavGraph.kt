@@ -1,14 +1,15 @@
 package com.example.appinventario.navigation
 
 import androidx.compose.runtime.*
-import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.appinventario.ui.screens.*
 import com.example.appinventario.ui.viewmodels.AuthState
+import com.example.appinventario.ui.viewmodels.AuthViewModel
 import com.example.appinventario.ui.viewmodels.InventarioViewModel
+import org.koin.androidx.compose.koinViewModel
 
 // Rutas de navegación
 object Rutas {
@@ -19,13 +20,13 @@ object Rutas {
     const val RECETA_LLAVEROS   = "receta_llaveros"   // admin
 }
 
-// NavGraph principal
 @Composable
 fun AppNavGraph(
-    viewModel: InventarioViewModel,
+    authViewModel: AuthViewModel = koinViewModel(),
+    inventarioViewModel: InventarioViewModel = koinViewModel(),
     navController: NavHostController = rememberNavController()
 ) {
-    val authState by viewModel.authState.collectAsState()
+    val authState by authViewModel.authState.collectAsState()
 
     // Reaccionar al estado de auth para navegar automáticamente
     LaunchedEffect(authState) {
@@ -37,7 +38,6 @@ fun AppNavGraph(
                 }
             }
             is AuthState.Idle -> {
-                // Al cerrar sesión volvemos al login
                 navController.navigate(Rutas.LOGIN) {
                     popUpTo(0) { inclusive = true }
                 }
@@ -50,46 +50,46 @@ fun AppNavGraph(
         navController = navController,
         startDestination = Rutas.LOGIN
     ) {
-/*
         // ── Login
         composable(Rutas.LOGIN) {
-            LoginScreen(viewModel = viewModel)
+            LoginScreen(
+                viewModel = authViewModel,
+                onLoginExitoso = {
+                    // La navegación se maneja en el LaunchedEffect superior
+                }
+            )
         }
 
         // ── Catálogo (cliente, solo lectura)
         composable(Rutas.CATALOGO) {
             CatalogoScreen(
-                viewModel = viewModel,
-                onCerrarSesion = { viewModel.cerrarSesion() }
+                // Si CatalogoScreen requiere su propio ViewModel, Koin lo inyectará dentro de la pantalla
+                onCerrarSesion = { authViewModel.logout() }
             )
         }
 
         // ── Edición del catálogo (admin)
         composable(Rutas.EDICION_CATALOGO) {
             EdicionCatalogoScreen(
-                viewModel = viewModel,
                 onNavigateTo = { ruta -> navController.navigate(ruta) },
-                onCerrarSesion = { viewModel.cerrarSesion() }
+                onCerrarSesion = { authViewModel.logout() }
             )
         }
 
         // ── Materiales (admin)
         composable(Rutas.MATERIALES) {
             MaterialesScreen(
-                viewModel = viewModel,
                 onNavigateTo = { ruta -> navController.navigate(ruta) },
-                onCerrarSesion = { viewModel.cerrarSesion() }
+                onCerrarSesion = { authViewModel.logout() }
             )
         }
 
         // ── Receta Llaveros (admin)
         composable(Rutas.RECETA_LLAVEROS) {
             RecetaLlaverosScreen(
-                viewModel = viewModel,
                 onNavigateTo = { ruta -> navController.navigate(ruta) },
-                onCerrarSesion = { viewModel.cerrarSesion() }
+                onCerrarSesion = { authViewModel.logout() }
             )
         }
-        */
     }
 }

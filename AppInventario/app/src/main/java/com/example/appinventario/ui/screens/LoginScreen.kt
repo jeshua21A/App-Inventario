@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -13,25 +15,24 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import com.example.appinventario.R
 import com.example.appinventario.ui.theme.AppColors
 import com.example.appinventario.ui.theme.AppInventarioTheme
-import com.example.appinventario.ui.viewmodels.InventarioViewModel
 import com.example.appinventario.ui.viewmodels.AuthState
+import com.example.appinventario.ui.viewmodels.AuthViewModel
 
 @Composable
 fun LoginScreen(
-    viewModel: InventarioViewModel,
+    viewModel: AuthViewModel,
     onLoginExitoso: () -> Unit
 ) {
-    //- Dejar usuario y contraseña
     var usuario by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
 
+    // Obtenemos el estado de autenticación del ViewModel
     val authState by viewModel.authState.collectAsState()
-    //val errorGeneral by viewModel.loginError.collectAsState()
 
+    // Si el estado cambia a Autenticado, disparamos la navegación
     LaunchedEffect(authState) {
         if (authState is AuthState.Autenticado) {
             onLoginExitoso()
@@ -63,12 +64,10 @@ fun LoginScreen(
             // Campo Usuario
             OutlinedTextField(
                 value = usuario,
-                onValueChange = {
-                    usuario = it
-                },
+                onValueChange = { usuario = it },
                 label = { Text("Usuario") },
                 modifier = Modifier.fillMaxWidth(),
-                //isError = errorGeneral != null,
+                isError = authState is AuthState.Error,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = AppColors.BrownMid.copy(alpha = 0.8f),
@@ -88,16 +87,12 @@ fun LoginScreen(
             // Campo Contraseña
             OutlinedTextField(
                 value = contrasena,
-                onValueChange = {
-                    contrasena = it
-                    //TODO: Error generico, cambiar
-                },
+                onValueChange = { contrasena = it },
                 label = { Text("Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
-                //TODO: Error generico, cambiar
-                //isError = errorGeneral != null,
+                isError = authState is AuthState.Error,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = AppColors.BrownMid.copy(alpha = 0.8f),
@@ -112,28 +107,22 @@ fun LoginScreen(
                 )
             )
 
-            // Mensaje de error
-            //TODO: error generico, cambiar
-            /*if (errorGeneral != null) {
+            // Mensaje de error dinámico
+            if (authState is AuthState.Error) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = errorGeneral!!,
+                    text = (authState as AuthState.Error).message,
                     color = AppColors.ErrorRed,
                     fontSize = 13.sp
                 )
-            }*/
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Botón Iniciar Sesion
+            // Botón Iniciar Sesión con indicador de carga
             Button(
-                //-Logica de Boton solo de prueba, reemplazarlo por funcion del viewmodel
-                onClick = {
-                    viewModel.login(
-                        usuario,
-                        contrasena
-                    )
-                },
+                onClick = { viewModel.login(usuario, contrasena) },
+                enabled = authState !is AuthState.Loading,
                 modifier = Modifier
                     .width(200.dp)
                     .height(52.dp),
@@ -143,21 +132,27 @@ fun LoginScreen(
                     contentColor = AppColors.TextOnDark
                 )
             ) {
-                Text("Iniciar Sesión", fontSize = 16.sp)
+                if (authState is AuthState.Loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = AppColors.TextOnDark,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Iniciar Sesión", fontSize = 16.sp)
+                }
             }
         }
     }
 }
 
-// Preview
-@Preview(
-    name = "Login Screen Preview",
-    showBackground = true,
-    showSystemUi = true
-)
+// Preview (Actualizado)
+@Preview(name = "Login Screen Preview", showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreenPreview() {
     AppInventarioTheme {
-        Text("Preview Login")
+        Box(modifier = Modifier.fillMaxSize().background(AppColors.Cream)) {
+            Text("Vista previa del Login", modifier = Modifier.align(Alignment.Center))
+        }
     }
 }
