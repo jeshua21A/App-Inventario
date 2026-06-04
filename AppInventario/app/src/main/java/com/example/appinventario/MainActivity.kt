@@ -16,6 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appinventario.data.local.database.AppDatabase
 import com.example.appinventario.ui.screens.CatalogoScreen
 import com.example.appinventario.ui.screens.MaterialesScreen
+import com.example.appinventario.ui.screens.RecetaLlaverosScreen
 import com.example.appinventario.ui.theme.AppInventarioTheme
 import com.example.appinventario.ui.viewmodels.InventarioViewModel
 import com.example.appinventario.ui.viewmodels.InventarioViewModelFactory
@@ -41,7 +42,12 @@ class MainActivity : ComponentActivity() {
                 // Mostrar CatalogoScreen (con Koin, se obtiene automáticamente)
                 //CatalogoScreen()
                 // MaterialesScreen(viewModel = inventarioViewModel)
-                MaterialesScreen()
+
+                // Mostrar MaterialesScreen
+                //MaterialesScreen()
+
+                //Mostrar pantalla de recetas
+                //RecetaLlaverosScreen()
                 /*
                 // Código original comentado:
                 // Creamos o recuperamos el ViewModel

@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.appinventario.R
-import com.example.appinventario.data.local.entities.LlaveroEntity
 import com.example.appinventario.data.local.entities.MaterialEntity
 import com.example.appinventario.navigation.Rutas
 import com.example.appinventario.ui.components.*
@@ -44,32 +43,41 @@ import kotlin.collections.chunked
 @Composable
 fun MaterialesScreen(
     viewModel: MaterialesViewModel = koinViewModel(),
+    navController: NavController = rememberNavController()
 ) {
-    val listaMateriales by viewModel.listaMateriles.collectAsState()
+    val materiales by viewModel.listaMateriales.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
     var busquedaTexto by remember { mutableStateOf("") }
     var materialSeleccionado by remember { mutableStateOf<MaterialEntity?>(null) }
+    var mostrarDialogoAgregar by remember { mutableStateOf(false) }
+    var isLoadingRecetas by remember { mutableStateOf(true) }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit){
-        if(listaMateriales.isEmpty()){
+        if(materiales.isEmpty()){
             viewModel.cargarMateriales()
         }
     }
 
     // Filtrar materiales por busqueda
-    val materialesFiltrados = if (busquedaTexto.isBlank()) listaMateriales
-    else listaMateriales.filter {
-        it.nombre.contains(busquedaTexto, ignoreCase = true)
-    }
+    val materialesFiltrados =
+        if (busquedaTexto.isBlank())
+            materiales
+        else materiales.filter {
+            it.nombre.contains(busquedaTexto, ignoreCase = true)
+        }
 
-    // Opciones del menu lateral
-    val opcionesMenu = getOpcionesCliente(
-        onCerrarSesion = { /* TODO: Implementar cierre de sesión */ }
+    // Opciones del menu lateral (Admin)
+    val opcionesMenu = getOpcionesAdmin(
+        onNavigateToCatalogo = { navController.navigate(Rutas.CATALOGO) },
+        onNavigateToEdicionCatalogo = { navController.navigate(Rutas.EDICION_CATALOGO) },
+        onNavigateToMateriales = { navController.navigate(Rutas.MATERIALES) },
+        onNavigateToRecetas = { },
+        onCerrarSesion = { }
     )
 
     ModalNavigationDrawer(
@@ -123,7 +131,23 @@ fun MaterialesScreen(
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                BarraBusqueda(value = busquedaTexto, onValueChange = { busquedaTexto = it })
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    BarraBusqueda(
+                        value = busquedaTexto,
+                        onValueChange = { busquedaTexto = it },
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    BotonAnadir(
+                        onClick = { mostrarDialogoAgregar = true }
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(14.dp))
 
@@ -139,14 +163,18 @@ fun MaterialesScreen(
                 }
 
                 // Mostrar loading
-                if (isLoading && listaMateriales.isEmpty()) {
+                if (isLoading && materiales.isEmpty()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator()
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("Cargando materiales...", color = AppColors.BrownText, fontSize = 14.sp)
+                        }
                     }
                 } else if (materialesFiltrados.isEmpty()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Sin productos disponibles.", color = AppColors.BrownSub, fontSize = 15.sp)
+                            Text("Sin materiales disponibles.", color = AppColors.BrownSub, fontSize = 15.sp)
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(onClick = { viewModel.cargarMateriales() }) {
                                 Text("Cargar desde la nube")

@@ -114,16 +114,14 @@ fun LoginScreen(
 
             // Mensaje de error
             //TODO: error generico, cambiar
-            /*
-            if (errorGeneral != null) {
+            /*if (errorGeneral != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = errorGeneral!!,
                     color = AppColors.ErrorRed,
                     fontSize = 13.sp
                 )
-            }
-            */
+            }*/
 
             Spacer(modifier = Modifier.height(32.dp))
 

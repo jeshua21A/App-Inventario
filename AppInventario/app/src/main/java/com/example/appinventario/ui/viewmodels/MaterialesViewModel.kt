@@ -27,7 +27,7 @@ class MaterialesViewModel (
     val syncMessage: StateFlow<String?> = _syncMessage.asStateFlow()
 
     // Lista de materiales desde caché local
-    val listaMateriles: StateFlow<List<MaterialEntity>> = inventarioDao.getAllMateriales()
+    val listaMateriales: StateFlow<List<MaterialEntity>> = inventarioDao.getAllMateriales()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

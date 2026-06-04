@@ -5,7 +5,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -22,6 +22,8 @@ fun MaterialAsignadoCard(
     onCantidadCambio: (Double) -> Unit,
     onEliminar: () -> Unit
 ) {
+    var cantidadTexto by remember(cantidad) { mutableStateOf(cantidad.toString()) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
@@ -49,18 +51,26 @@ fun MaterialAsignadoCard(
             }
 
             OutlinedTextField(
-                value = cantidad.toString(),
-                onValueChange = {
-                    onCantidadCambio(it.toDoubleOrNull() ?: 0.0)
+                value = cantidadTexto,
+                onValueChange = { nuevaCantidad ->
+                    cantidadTexto = nuevaCantidad
+                    val cantidadDouble = nuevaCantidad.toDoubleOrNull()
+                    if (cantidadDouble != null && cantidadDouble > 0) {
+                        onCantidadCambio(cantidadDouble)
+                    }
                 },
-                modifier = Modifier.width(80.dp),
+                modifier = Modifier.width(90.dp),
                 singleLine = true,
                 shape = MaterialTheme.shapes.small,
                 textStyle = androidx.compose.ui.text.TextStyle(
                     fontSize = 14.sp,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = AppColors.BrownLight,
+                    unfocusedBorderColor = AppColors.BrownLight.copy(alpha = 0.5f)
+                )
             )
 
             IconButton(onClick = onEliminar) {
