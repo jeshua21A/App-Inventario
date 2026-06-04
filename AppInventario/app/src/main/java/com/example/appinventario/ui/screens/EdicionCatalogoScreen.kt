@@ -45,6 +45,8 @@ fun EdicionCatalogoScreen(
     var busquedaTexto by remember { mutableStateOf("") }
     var llaveroEditando by remember { mutableStateOf<LlaveroEntity?>(null) }
     var mostrarDialogoAgregar by remember { mutableStateOf(false) }
+    val errorMessage by viewModel.errorMessage.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -114,6 +116,22 @@ fun EdicionCatalogoScreen(
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                if (isLoading) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        color = AppColors.BrownLight
+                    )
+                }
+
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = AppColors.ErrorRed,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Row(
@@ -207,7 +225,9 @@ fun EdicionCatalogoScreen(
             },
             onEliminar = if (llaveroEditando != null) {
                 {
+                    viewModel.eliminarLlavero(llaveroEditando!!)
                     llaveroEditando = null
+                    mostrarDialogoAgregar = false
                 }
             } else null,
             onCancelar = {

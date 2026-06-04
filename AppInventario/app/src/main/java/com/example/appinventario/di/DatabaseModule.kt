@@ -76,8 +76,7 @@ val appModule = module {
     // viewModel de Catalogo
     viewModel {
         CatalogoViewModel(
-            inventarioDao = get(),
-            apiService = get()
+            repositorio = get()
         )
     }
     //View Model de Recetas

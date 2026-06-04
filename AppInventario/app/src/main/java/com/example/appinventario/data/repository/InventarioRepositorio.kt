@@ -26,21 +26,26 @@ class InventarioRepositorio @Inject constructor(
         } catch (e: Exception) { e.printStackTrace() }
     }
 
-    suspend fun agregarMaterial(material: MaterialEntity) {
-        val dto = apiService.createMaterial(material.toDto())
-        inventarioDao.insertMaterial(dto.toEntity())
-    }
-
-    suspend fun actualizarMaterial(material: MaterialEntity) {
-        val dto = apiService.updateMaterial(material.id, material.toDto())
-        inventarioDao.updateMaterial(dto.toEntity())
+    // UNIFICADO: Alta y Modificación de Materiales
+    suspend fun guardarMaterial(material: MaterialEntity) {
+        try {
+            if (material.id == 0) {
+                val dto = apiService.createMaterial(material.toDto())
+                inventarioDao.insertMaterial(dto.toEntity())
+            } else {
+                val dto = apiService.updateMaterial(material.id, material.toDto())
+                inventarioDao.updateMaterial(dto.toEntity())
+            }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     suspend fun eliminarMaterial(material: MaterialEntity) {
-        val response = apiService.deleteMaterial(material.id)
-        if (response.isSuccessful) {
-            inventarioDao.deleteMaterial(material)
-        }
+        try {
+            val response = apiService.deleteMaterial(material.id)
+            if (response.isSuccessful) {
+                inventarioDao.deleteMaterial(material)
+            }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     // --- LLAVEROS ---
@@ -53,35 +58,29 @@ class InventarioRepositorio @Inject constructor(
         } catch (e: Exception) { e.printStackTrace() }
     }
 
-    suspend fun agregarLlavero(llavero: LlaveroEntity) {
-        val dto = apiService.createLlavero(llavero.toDto())
-        inventarioDao.insertLlavero(dto.toEntity())
-    }
-
+    // UNIFICADO: Alta y Modificación de Llaveros
     suspend fun guardarLlavero(llavero: LlaveroEntity) {
-        if (llavero.id == 0) {
-            // Es nuevo: POST
-            val dto = apiService.createLlavero(llavero.toDto())
-            inventarioDao.insertLlavero(dto.toEntity())
-        } else {
-            val dto = apiService.updateLlavero(llavero.id, llavero.toDto())
-            inventarioDao.updateLlavero(dto.toEntity())
-        }
+        try {
+            if (llavero.id == 0) {
+                val dto = apiService.createLlavero(llavero.toDto())
+                inventarioDao.insertLlavero(dto.toEntity())
+            } else {
+                val dto = apiService.updateLlavero(llavero.id, llavero.toDto())
+                inventarioDao.updateLlavero(dto.toEntity())
+            }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     suspend fun eliminarLlavero(llavero: LlaveroEntity) {
-        try {
-            // 1. Intentamos borrar en el servidor (Backend Ktor)
-            val response = apiService.deleteLlavero(llavero.id)
+        // Quitamos el try-catch interno para que el ViewModel pueda capturar el error
+        val response = apiService.deleteLlavero(llavero.id)
 
-            // 2. Si el servidor responde que se borró con éxito (código 200-299)
-            if (response.isSuccessful) {
-                // 3. Lo borramos de la base de datos local del celular
-                inventarioDao.deleteLlavero(llavero)
-            }
-        } catch (e: Exception) {
-            // Manejo de errores (por ejemplo, si no hay internet)
-            e.printStackTrace()
+        if (response.isSuccessful) {
+            // Solo si la API confirma el borrado, lo quitamos del celular
+            inventarioDao.deleteLlavero(llavero)
+        } else {
+            // Si el servidor falla (ej. error 500 o 404), lanzamos el error
+            throw Exception("El servidor no pudo eliminar el producto (Error ${response.code()})")
         }
     }
 

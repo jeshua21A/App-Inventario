@@ -2,10 +2,9 @@ package com.example.appinventario.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appinventario.data.local.dao.InventarioDao
 import com.example.appinventario.data.local.entities.LlaveroEntity
 import com.example.appinventario.data.local.entities.LlaveroPublico
-import com.example.appinventario.data.network.InventarioApiService
+import com.example.appinventario.data.repository.InventarioRepositorio
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,11 +13,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class CatalogoViewModel(
-    private val inventarioDao: InventarioDao,
-    private val apiService: InventarioApiService
+    private val repositorio: InventarioRepositorio
 ) : ViewModel() {
 
-    // Estados de UI
+    // Estados de UI para control de carga y mensajes
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -28,16 +26,17 @@ class CatalogoViewModel(
     private val _syncMessage = MutableStateFlow<String?>(null)
     val syncMessage: StateFlow<String?> = _syncMessage.asStateFlow()
 
-    // Catalogo completo (Rol Admin)
-    // Lee toda la entidad LlaveroEntity usando tu consulta getAllLlaveros
-    val listaLlaveros: StateFlow<List<LlaveroEntity>> = inventarioDao.getAllLlaveros()
+    // Observamos los llaveros directamente desde el Repositorio (Reactividad total)
+    val listaLlaveros: StateFlow<List<LlaveroEntity>> = repositorio.todosLosLlaveros
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    val catalogoPublico: StateFlow<List<LlaveroPublico>> = inventarioDao.getCatalogoPublico()
+    // Si el repositorio no expone catalogoPublico, podrías añadirlo allí.
+    // Por ahora, lo mantenemos como flujo si la vista lo requiere.
+    val catalogoPublico: StateFlow<List<LlaveroPublico>> = MutableStateFlow<List<LlaveroPublico>>(emptyList())
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -45,33 +44,22 @@ class CatalogoViewModel(
         )
 
     init {
+        // Al iniciar, sincronizamos datos automáticamente
         loadLlaverosFromCloud()
     }
 
-    // Cargar llaveros desde Supabase y guardar en Room
+    // Sincronización: Pide al repo que traiga datos de la API y los guarde en Room
     fun loadLlaverosFromCloud() {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
-            _syncMessage.value = "Sincronizando con la nube..."
+            _syncMessage.value = "Sincronizando con el servidor..."
 
             try {
-                val llaverosDto = apiService.getLlaveros()
-
-                val entidadesLlaveros = llaverosDto.map { dto ->
-                    LlaveroEntity(
-                        id = dto.id ?: 0,
-                        nombre = dto.nombre,
-                        descripcion = dto.descripcion,
-                        precioVenta = dto.precioVenta
-                    )
-                }
-
-                inventarioDao.insertLlaveros(entidadesLlaveros)
-
-                _syncMessage.value = "${llaverosDto.size} llaveros sincronizados"
+                repositorio.sincronizarLlaveros()
+                _syncMessage.value = "Catálogo actualizado correctamente"
             } catch (e: Exception) {
-                _errorMessage.value = "Error al sincronizar: ${e.localizedMessage ?: e.message}"
+                _errorMessage.value = "Error de sincronización: ${e.localizedMessage}"
                 _syncMessage.value = null
             } finally {
                 _isLoading.value = false
@@ -79,34 +67,38 @@ class CatalogoViewModel(
         }
     }
 
-    // Probar conexion con Supabase
-    fun testConnection() {
+    // ALTA y MODIFICACIÓN: Esta función ahora impacta en API y Room
+    fun agregarLlaveroNuevo(nuevoLlavero: LlaveroEntity) {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
-
             try {
-                val llaveros = apiService.getLlaveros()
-                _errorMessage.value = "Conexion exitosa! ${llaveros.size} llaveros encontrados"
-            } catch (e: Exception) {
-                _errorMessage.value = "Error de conexion: ${e.message}"
+                // El Repositorio decide si hace POST o PUT y actualiza Room
+                repositorio.guardarLlavero(nuevoLlavero)
+                _syncMessage.value = "Producto guardado con éxito"
+            } catch (e : Exception) {
+                _errorMessage.value = "Error al guardar: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun agregarLlaveroNuevo(nuevoLlavero: LlaveroEntity) {
+    // BAJA: Elimina en API y luego en Room
+    fun eliminarLlavero(llavero: LlaveroEntity) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
-                inventarioDao.insertLlavero(nuevoLlavero)
-            } catch (e : Exception) {
-                _errorMessage.value = "Error local: ${e.message}"
+                repositorio.eliminarLlavero(llavero)
+                _syncMessage.value = "Producto eliminado"
+            } catch (e: Exception) {
+                _errorMessage.value = "Error al eliminar: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
-    // Limpiar mensajes (para cuando se cierra el dialogo)
+    // Limpiar mensajes para la UI
     fun clearMessages() {
         _errorMessage.value = null
         _syncMessage.value = null
