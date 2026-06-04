@@ -56,7 +56,6 @@ fun RecetaLlaverosScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Cargar datos al iniciar
     LaunchedEffect(Unit) {
         isLoadingRecetas = true
         if (llaveros.isEmpty()) {
@@ -69,7 +68,6 @@ fun RecetaLlaverosScreen(
         isLoadingRecetas = false
     }
 
-    // Verificar si las recetas se estan cargando
     val isRecetasLoading = materialesPorLlavero.isEmpty() && !isLoading && llaveros.isNotEmpty()
 
     val llaverosVisibles = if (busquedaTexto.isBlank()) llaveros
@@ -157,7 +155,6 @@ fun RecetaLlaverosScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Mensaje de error
                 if (errorMessage != null) {
                     Text(
                         text = errorMessage!!,
@@ -168,7 +165,6 @@ fun RecetaLlaverosScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                // Pantalla de carga inicial
                 if (isLoading && llaveros.isEmpty()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -178,7 +174,6 @@ fun RecetaLlaverosScreen(
                         }
                     }
                 }
-                // Pantalla de carga de recetas
                 else if (isRecetasLoading && llaveros.isNotEmpty()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -188,7 +183,6 @@ fun RecetaLlaverosScreen(
                         }
                     }
                 }
-                // Lista vacia
                 else if (llaverosVisibles.isEmpty() && !isLoading) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -200,7 +194,6 @@ fun RecetaLlaverosScreen(
                         }
                     }
                 }
-                // Lista de recetas
                 else {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -209,7 +202,9 @@ fun RecetaLlaverosScreen(
                         items(llaverosVisibles) { llavero ->
                             RecetaCard(
                                 llavero = llavero,
-                                materiales = viewModel.getMaterialesForLlavero(llavero.id),
+                                materiales = viewModel.getMaterialesForLlavero(llavero.id).map { triple ->
+                                    triple.second to triple.third
+                                },
                                 onEditar = { recetaSeleccionada = llavero }
                             )
                         }
@@ -219,9 +214,7 @@ fun RecetaLlaverosScreen(
         }
     }
 
-    // Dialogo para editar/agregar receta con pantalla de carga
     if (recetaSeleccionada != null || mostrarDialogoAgregar) {
-        // Pantalla de carga mientras se cargan los materiales
         if (materiales.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -253,33 +246,43 @@ fun RecetaLlaverosScreen(
                 }
             }
         } else {
+            val llaveroActual = recetaSeleccionada
             RecetaFormDialog(
-                titulo = if (recetaSeleccionada != null) "Editar Receta" else "Nueva Receta",
-                llavero = recetaSeleccionada,
-                listaLlaveros = llaveros,  // <- Este parametro es obligatorio
+                titulo = if (llaveroActual != null) "Editar Receta" else "Nueva Receta",
+                llavero = llaveroActual,
+                listaLlaveros = llaveros,
                 listaMateriales = materiales,
-                materialesAsignados = recetaSeleccionada?.let {
-                    viewModel.getMaterialesForLlavero(it.id)
-                } ?: emptyList(),
-                onGuardar = { llaveroId, items ->
-                    viewModel.saveRecetas(llaveroId, items)
+                materialesAsignados = if (llaveroActual != null) {
+                    viewModel.getMaterialesForLlavero(llaveroActual.id)
+                } else {
+                    emptyList()
+                },
+                onAgregarMaterial = { llaveroId, materialId, cantidad ->
+                    viewModel.agregarMaterialAReceta(llaveroId, materialId, cantidad)
+                },
+                onActualizarCantidad = { recetaId, llaveroId, materialId, nuevaCantidad ->
+                    viewModel.editarCantidadMaterial(recetaId, llaveroId, materialId, nuevaCantidad)
+                },
+                onEliminarMaterial = { recetaId, llaveroId ->
+                    viewModel.eliminarMaterialDeReceta(recetaId, llaveroId)
+                },
+                onGuardar = {
                     recetaSeleccionada = null
                     mostrarDialogoAgregar = false
+                    viewModel.loadAllRecetas()
                 },
                 onCancelar = {
                     recetaSeleccionada = null
                     mostrarDialogoAgregar = false
-                }
+                },
             )
         }
     }
 }
 
-// PREVIEW
 @Preview(
     name = "Receta Llaveros Screen Preview",
     showBackground = true,
-
     showSystemUi = true
 )
 @Composable

@@ -49,10 +49,7 @@ class InventarioRepositorio @Inject constructor(
 
     suspend fun saveRecetaToCloud(receta: RecetaDto): RecetaDto? {
         val response = apiService.createReceta(receta)
-        return if (response.isSuccessful) {
-            response.body()
-        } else {
-            null
-        }
+        return if (response.isSuccessful) response.body()?.firstOrNull() else null
     }
+
 }

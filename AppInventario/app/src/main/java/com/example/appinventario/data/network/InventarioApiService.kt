@@ -100,12 +100,22 @@ interface InventarioApiService {
     ): RecetaDto
 
     @POST("receta")
-    suspend fun createReceta(@Body receta: RecetaDto): Response<RecetaDto>
-
-    @PUT
-    suspend fun updateReceta(
-        @Url url: String,
+    @Headers("Prefer: return=representation")
+    suspend fun createReceta(
         @Body receta: RecetaDto
+    ): Response<List<RecetaDto>>
+
+    @PATCH("receta")
+    @Headers("Prefer: return=minimal")
+    suspend fun updateReceta(
+        @Query("id") id: String,
+        @Body receta: RecetaDto
+    ): Response<Unit>
+
+    @PUT("receta")
+    suspend fun updateRecetaCantidad(
+        @Query("id") id: String,
+        @Body cantidad: Map<String, Double>
     ): Response<Unit>
 
     @DELETE("receta")

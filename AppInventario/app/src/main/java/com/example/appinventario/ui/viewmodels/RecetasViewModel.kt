@@ -44,9 +44,8 @@ class RecetasViewModel(
         )
 
     // Mapa que almacena los materiales asignados a cada llavero
-    private val _materialesPorLlavero = MutableStateFlow<Map<Int, List<Pair<MaterialEntity, Double>>>>(emptyMap())
-    val materialesPorLlavero: StateFlow<Map<Int, List<Pair<MaterialEntity, Double>>>> = _materialesPorLlavero.asStateFlow()
-
+    private val _materialesPorLlavero = MutableStateFlow<Map<Int, List<Triple<Int, MaterialEntity, Double>>>>(emptyMap())
+    val materialesPorLlavero: StateFlow<Map<Int, List<Triple<Int, MaterialEntity, Double>>>> = _materialesPorLlavero.asStateFlow()
     // Carga todos los llaveros desde Supabase y los guarda en Room
     fun loadLlaveros() {
         viewModelScope.launch {
@@ -107,7 +106,7 @@ class RecetasViewModel(
             try {
                 val recetasDto = apiService.getRecetas()
                 val materialesList = materiales.value
-                val materialesMap = mutableMapOf<Int, MutableList<Pair<MaterialEntity, Double>>>()
+                val materialesMap = mutableMapOf<Int, MutableList<Triple<Int, MaterialEntity, Double>>>()
 
                 recetasDto.forEach { recetaDto ->
                     val material = materialesList.find { it.id == recetaDto.idMaterial }
@@ -115,7 +114,8 @@ class RecetasViewModel(
                         if (!materialesMap.containsKey(recetaDto.idLlavero)) {
                             materialesMap[recetaDto.idLlavero] = mutableListOf()
                         }
-                        materialesMap[recetaDto.idLlavero]?.add(material to recetaDto.cantidad)
+                        // Guardar como Triple(recetaId, material, cantidad)
+                        materialesMap[recetaDto.idLlavero]?.add(Triple(recetaDto.id ?: 0, material, recetaDto.cantidad))
                     }
                 }
 
@@ -127,7 +127,7 @@ class RecetasViewModel(
     }
 
     // Obtiene los materiales asignados a un llavero especifico
-    fun getMaterialesForLlavero(llaveroId: Int): List<Pair<MaterialEntity, Double>> {
+    fun getMaterialesForLlavero(llaveroId: Int): List<Triple<Int, MaterialEntity, Double>> {
         return _materialesPorLlavero.value[llaveroId] ?: emptyList()
     }
 
@@ -198,25 +198,42 @@ class RecetasViewModel(
     }
 
 
-    // Actualiza la cantidad de un material en una receta especifica
-    fun updateRecetaCantidad(recetaId: Int, nuevaCantidad: Double) {
+    // Añadir un nuevo material a la receta (POST)
+    fun agregarMaterialAReceta(llaveroId: Int, materialId: Int, cantidad: Double) {
+        viewModelScope.launch {
+            try {
+                val recetaDto = RecetaDto(
+                    idLlavero = llaveroId,
+                    idMaterial = materialId,
+                    cantidad = cantidad
+                )
+                val response = apiService.createReceta(recetaDto)
+                if (response.isSuccessful) {
+                    loadAllRecetas()
+                } else {
+                    _errorMessage.value = "Error al agregar: ${response.errorBody()?.string()}"
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Error al agregar material: ${e.message}"
+            }
+        }
+    }
+
+    fun actualizarCantidadMaterial(recetaId: Int, llaveroId: Int, materialId: Int, nuevaCantidad: Double) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val todasRecetas = apiService.getRecetas()
-                val recetaActual = todasRecetas.find { it.id == recetaId }
-
-                if (recetaActual != null) {
-                    val recetaActualizada = RecetaDto(
-                        idLlavero = recetaActual.idLlavero,
-                        idMaterial = recetaActual.idMaterial,
-                        cantidad = nuevaCantidad
-                    )
-                    val response = apiService.updateReceta("eq.$recetaId", recetaActualizada)
-                    if (response.isSuccessful) {
-                        loadAllRecetas()
-                        _errorMessage.value = "Cantidad actualizada"
-                    }
+                val recetaActualizada = RecetaDto(
+                    idLlavero = llaveroId,
+                    idMaterial = materialId,
+                    cantidad = nuevaCantidad
+                )
+                val response = apiService.updateReceta("eq.$recetaId", recetaActualizada)
+                if (response.isSuccessful) {
+                    loadAllRecetas()
+                    _errorMessage.value = "Cantidad actualizada"
+                } else {
+                    _errorMessage.value = "Error: ${response.errorBody()?.string()}"
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error: ${e.message}"
@@ -226,23 +243,39 @@ class RecetasViewModel(
         }
     }
 
-    // Elimina una receta especifica por su ID
-    // Elimina una receta especifica por su ID
-    fun deleteReceta(recetaId: Int) {
+    // Editar cantidad de un material existente (PUT)
+    fun editarCantidadMaterial(recetaId: Int, llaveroId: Int, materialId: Int, nuevaCantidad: Double) {
         viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val response = apiService.deleteReceta("eq.$recetaId")
-                if (response.isSuccessful) {
-                    loadAllRecetas()
-                    _errorMessage.value = "Receta eliminada"
-                } else {
-                    _errorMessage.value = "Error: ${response.errorBody()?.string()}"
+            val recetaActualizada = RecetaDto(
+                idLlavero = llaveroId,
+                idMaterial = materialId,
+                cantidad = nuevaCantidad
+            )
+            val response = apiService.updateReceta("eq.$recetaId", recetaActualizada)
+            if (response.isSuccessful) {
+                val mapaActual = _materialesPorLlavero.value.toMutableMap()
+                val listaActual = mapaActual[llaveroId]?.toMutableList() ?: mutableListOf()
+                val index = listaActual.indexOfFirst { it.first == recetaId }
+                if (index != -1) {
+                    val material = listaActual[index].second
+                    listaActual[index] = Triple(recetaId, material, nuevaCantidad)
+                    mapaActual[llaveroId] = listaActual
+                    _materialesPorLlavero.value = mapaActual
                 }
-            } catch (e: Exception) {
-                _errorMessage.value = "Error al eliminar receta: ${e.message}"
-            } finally {
-                _isLoading.value = false
+            }
+        }
+    }
+
+    // Eliminar material de la receta (DELETE)
+    fun eliminarMaterialDeReceta(recetaId: Int, llaveroId: Int) {
+        viewModelScope.launch {
+            val response = apiService.deleteReceta("eq.$recetaId")
+            if (response.isSuccessful) {
+                val mapaActual = _materialesPorLlavero.value.toMutableMap()
+                val listaActual = mapaActual[llaveroId]?.toMutableList() ?: mutableListOf()
+                listaActual.removeAll { it.first == recetaId }
+                mapaActual[llaveroId] = listaActual
+                _materialesPorLlavero.value = mapaActual
             }
         }
     }
