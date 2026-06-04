@@ -6,6 +6,7 @@ import com.example.appinventario.data.local.entities.MaterialEntity
 import com.example.appinventario.data.local.entities.UsuarioEntity
 import com.example.appinventario.data.network.InventarioApiService
 import com.example.appinventario.data.remote.dto.LoginDto
+import com.example.appinventario.data.remote.dto.RecetaDto
 import com.example.appinventario.data.remote.mapper.toEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -39,5 +40,19 @@ class InventarioRepositorio @Inject constructor(
                 password = password
             )
         ).toEntity()
+    }
+
+    // --- Recetas
+    suspend fun getRecetasFromCloud(): List<RecetaDto> {
+        return apiService.getRecetas()
+    }
+
+    suspend fun saveRecetaToCloud(receta: RecetaDto): RecetaDto? {
+        val response = apiService.createReceta(receta)
+        return if (response.isSuccessful) {
+            response.body()
+        } else {
+            null
+        }
     }
 }

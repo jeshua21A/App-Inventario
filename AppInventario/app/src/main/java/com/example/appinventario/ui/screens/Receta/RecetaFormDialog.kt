@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.appinventario.ui.screens.Receta
 
 import androidx.compose.foundation.layout.*
@@ -19,13 +21,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.appinventario.data.local.entities.LlaveroEntity
 import com.example.appinventario.data.local.entities.MaterialEntity
-import com.example.appinventario.ui.screens.Receta.MaterialAsignadoCard
 import com.example.appinventario.ui.theme.AppColors
 
 @Composable
 fun RecetaFormDialog(
     titulo: String,
     llavero: LlaveroEntity?,
+    listaLlaveros: List<LlaveroEntity>,
     listaMateriales: List<MaterialEntity>,
     materialesAsignados: List<Pair<MaterialEntity, Double>>,
     onGuardar: (llaveroId: Int, items: List<Triple<Int, Double, Double>>) -> Unit,
@@ -34,8 +36,18 @@ fun RecetaFormDialog(
     var materialesSeleccionados by remember {
         mutableStateOf(materialesAsignados.toMutableList())
     }
-    var materialSeleccionadoId by remember { mutableStateOf<Int?>(null) }
+    var materialSeleccionado by remember { mutableStateOf<MaterialEntity?>(null) }
     var cantidadNueva by remember { mutableStateOf("") }
+    var expandedMaterial by remember { mutableStateOf(false) }
+
+    var llaveroSeleccionado by remember { mutableStateOf(llavero) }
+    var errorLlavero by remember { mutableStateOf<String?>(null) }
+
+    val materialesDisponibles = remember(listaMateriales, materialesSeleccionados) {
+        listaMateriales.filter { material ->
+            materialesSeleccionados.none { it.first.id == material.id }
+        }
+    }
 
     Dialog(
         onDismissRequest = onCancelar,
@@ -45,7 +57,7 @@ fun RecetaFormDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 16.dp)
-                .heightIn(max = 650.dp),
+                .heightIn(max = 700.dp),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = AppColors.Cream),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -57,7 +69,6 @@ fun RecetaFormDialog(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Titulo
                 Text(
                     text = titulo,
                     fontSize = 20.sp,
@@ -65,20 +76,29 @@ fun RecetaFormDialog(
                     color = AppColors.BrownText
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Informacion del llavero
-                if (llavero != null) {
-                    Text(
-                        text = "Producto: ${llavero.nombre}",
-                        fontSize = 14.sp,
-                        color = AppColors.BrownSub
+                // Selector o info del llavero
+                if (llavero == null) {
+                    LlaveroSelector(
+                        llaveroSeleccionado = llaveroSeleccionado,
+                        listaLlaveros = listaLlaveros,
+                        onLlaveroSelected = {
+                            llaveroSeleccionado = it
+                            errorLlavero = null
+                        },
+                        isError = errorLlavero != null,
+                        errorMessage = errorLlavero
                     )
+                } else {
+                    LlaveroInfoCard(llavero = llavero)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(color = AppColors.BrownLight.copy(alpha = 0.3f))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Selector de material
+                // Seccion de agregar materiales
                 Text(
                     text = "Agregar material:",
                     fontSize = 14.sp,
@@ -89,27 +109,75 @@ fun RecetaFormDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Fila con Seleccionar material (izquierda) y Cantidad (derecha)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Seleccionar material
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        // TODO: Reemplazar con ExposedDropdownMenuBox cuando se conecte al ViewModel
-                        OutlinedTextField(
-                            value = materialSeleccionadoId?.toString() ?: "",
-                            onValueChange = {},
-                            label = { Text("Seleccionar material") },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = false,
-                            shape = RoundedCornerShape(12.dp)
-                        )
+                    Column(modifier = Modifier.weight(1f)) {
+                        ExposedDropdownMenuBox(
+                            expanded = expandedMaterial,
+                            onExpandedChange = { expandedMaterial = it }
+                        ) {
+                            OutlinedTextField(
+                                value = materialSeleccionado?.nombre ?: "",
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Seleccionar material") },
+                                placeholder = { Text("Elige un material") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMaterial) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = AppColors.BrownLight,
+                                    unfocusedBorderColor = AppColors.BrownLight.copy(alpha = 0.5f)
+                                )
+                            )
+                            ExposedDropdownMenu(
+                                expanded = expandedMaterial,
+                                onDismissRequest = { expandedMaterial = false },
+                                modifier = Modifier.heightIn(max = 300.dp)
+                            ) {
+                                if (materialesDisponibles.isEmpty()) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                "No hay materiales disponibles",
+                                                color = AppColors.BrownSub
+                                            )
+                                        },
+                                        onClick = { expandedMaterial = false }
+                                    )
+                                } else {
+                                    materialesDisponibles.forEach { material ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Column {
+                                                    Text(
+                                                        text = material.nombre,
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Medium,
+                                                        color = AppColors.BrownText
+                                                    )
+                                                    Text(
+                                                        text = "Stock: ${material.stockActual} ${material.unidadMedida}",
+                                                        fontSize = 11.sp,
+                                                        color = AppColors.BrownSub
+                                                    )
+                                                }
+                                            },
+                                            onClick = {
+                                                materialSeleccionado = material
+                                                expandedMaterial = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
 
-                    // Cantidad
                     OutlinedTextField(
                         value = cantidadNueva,
                         onValueChange = { cantidadNueva = it },
@@ -117,26 +185,27 @@ fun RecetaFormDialog(
                         modifier = Modifier.width(100.dp),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = AppColors.BrownLight,
+                            unfocusedBorderColor = AppColors.BrownLight.copy(alpha = 0.5f)
+                        )
                     )
                 }
 
-                // Boton Agregar (centrado debajo)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
                     onClick = {
-                        val material = listaMateriales.find { it.id == materialSeleccionadoId }
+                        val material = materialSeleccionado
                         val cantidad = cantidadNueva.toDoubleOrNull()
                         if (material != null && cantidad != null && cantidad > 0) {
-                            if (materialesSeleccionados.none { it.first.id == material.id }) {
-                                materialesSeleccionados.add(material to cantidad)
-                            }
-                            materialSeleccionadoId = null
+                            materialesSeleccionados.add(material to cantidad)
+                            materialSeleccionado = null
                             cantidadNueva = ""
                         }
                     },
-                    enabled = materialSeleccionadoId != null && cantidadNueva.isNotBlank(),
+                    enabled = materialSeleccionado != null && cantidadNueva.isNotBlank(),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp),
@@ -183,11 +252,18 @@ fun RecetaFormDialog(
                             )
                         }
                     }
+                } else {
+                    Text(
+                        text = "No hay materiales asignados",
+                        fontSize = 13.sp,
+                        color = AppColors.BrownSub,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Botones Cancelar y Guardar
+                // Botones
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -196,9 +272,8 @@ fun RecetaFormDialog(
                         onClick = onCancelar,
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = AppColors.RedLigh,
-                            contentColor = AppColors.Cream
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = AppColors.BrownText
                         )
                     ) {
                         Text("Cancelar", fontSize = 14.sp)
@@ -206,12 +281,19 @@ fun RecetaFormDialog(
 
                     Button(
                         onClick = {
-                            if (llavero != null && materialesSeleccionados.isNotEmpty()) {
-                                val items = materialesSeleccionados.map { (material, cantidad) ->
-                                    Triple(material.id, cantidad, material.precioPorUnidad)
-                                }
-                                onGuardar(llavero.id, items)
+                            val llaveroId = llaveroSeleccionado?.id ?: llavero?.id
+                            if (llaveroId == null) {
+                                errorLlavero = "Debes seleccionar un llavero"
+                                return@Button
                             }
+                            if (materialesSeleccionados.isEmpty()) {
+                                return@Button
+                            }
+                            val items = materialesSeleccionados.map { (material, cantidad) ->
+                                Triple(material.id, cantidad, material.precioPorUnidad)
+                            }
+                            onGuardar(llaveroId, items)
+                            onCancelar()
                         },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),

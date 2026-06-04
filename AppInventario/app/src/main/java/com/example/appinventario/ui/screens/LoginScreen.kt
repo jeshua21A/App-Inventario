@@ -30,7 +30,7 @@ fun LoginScreen(
     var contrasena by remember { mutableStateOf("") }
 
     val authState by viewModel.authState.collectAsState()
-    val errorGeneral by viewModel.loginError.collectAsState()
+    //val errorGeneral by viewModel.loginError.collectAsState()
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Autenticado) {
@@ -68,7 +68,7 @@ fun LoginScreen(
                 },
                 label = { Text("Usuario") },
                 modifier = Modifier.fillMaxWidth(),
-                isError = errorGeneral != null,
+                //isError = errorGeneral != null,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = AppColors.BrownMid.copy(alpha = 0.8f),
@@ -97,7 +97,7 @@ fun LoginScreen(
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 //TODO: Error generico, cambiar
-                isError = errorGeneral != null,
+                //isError = errorGeneral != null,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = AppColors.BrownMid.copy(alpha = 0.8f),
@@ -114,14 +114,14 @@ fun LoginScreen(
 
             // Mensaje de error
             //TODO: error generico, cambiar
-            if (errorGeneral != null) {
+            /*if (errorGeneral != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = errorGeneral!!,
                     color = AppColors.ErrorRed,
                     fontSize = 13.sp
                 )
-            }
+            }*/
 
             Spacer(modifier = Modifier.height(32.dp))
 

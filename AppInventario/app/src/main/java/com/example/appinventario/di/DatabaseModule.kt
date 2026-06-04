@@ -5,6 +5,7 @@ import com.example.appinventario.data.network.InventarioApiService
 import com.example.appinventario.data.repository.InventarioRepositorio
 import com.example.appinventario.ui.viewmodels.InventarioViewModel
 import com.example.appinventario.ui.viewmodels.CatalogoViewModel
+import com.example.appinventario.ui.viewmodels.RecetasViewModel
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -24,13 +25,13 @@ val appModule = module {
         AppDatabase.getDatabase(androidContext())
     }
 
-    // 2.DAO
+    // 2. DAO
     single {
         get<AppDatabase>().inventarioDao()
     }
 
     // 3. OkHttpClient con interceptores
-    single {
+    single<OkHttpClient> {
         OkHttpClient.Builder()
             .addInterceptor { chain ->
                 chain.proceed(chain.request().newBuilder()
@@ -46,22 +47,25 @@ val appModule = module {
     }
 
     // 4. API Service
-    single {
+    @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+    single<InventarioApiService> {
         val contentType = "application/json".toMediaType()
         val json = Json {
             ignoreUnknownKeys = true
-            encodeDefaults = true
+            encodeDefaults = false
+            explicitNulls = false
+            isLenient = true
         }
 
         Retrofit.Builder()
             .baseUrl("$SUPABASE_URL/rest/v1/")
-            .client(get())
+            .client(get<OkHttpClient>())
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
             .create(InventarioApiService::class.java)
     }
 
-    // 5.Repositorio
+    // 5. Repositorio
     single {
         InventarioRepositorio(
             apiService = get(),
@@ -76,9 +80,16 @@ val appModule = module {
             apiService = get()
         )
     }
-    // Catalogo viewModel
+    // viewModel de Catalogo
     viewModel {
         CatalogoViewModel(
+            inventarioDao = get(),
+            apiService = get()
+        )
+    }
+    //View Model de Recetas
+    viewModel {
+        RecetasViewModel(
             inventarioDao = get(),
             apiService = get()
         )

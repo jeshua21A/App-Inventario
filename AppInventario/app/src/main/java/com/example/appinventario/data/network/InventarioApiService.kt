@@ -1,6 +1,7 @@
 package com.example.appinventario.data.network
 
 import com.example.appinventario.data.remote.dto.*
+import retrofit2.Response
 import retrofit2.http.*
 
 interface InventarioApiService {
@@ -77,25 +78,42 @@ interface InventarioApiService {
     ): UsuarioDto
 
     @POST("usuarios")*/
-
+    //LLAVEROS
     @GET("llavero")
     suspend fun getLlaveros(): List<LlaveroDto>
 
     @POST("llavero")
     suspend fun createLlavero(@Body llavero: LlaveroDto): LlaveroDto
-
+    //MATERIALES
     @GET("material")
     suspend fun getMateriales(): List<MaterialDto>
 
     @POST("material")
     suspend fun createMateriales(@Body material: MaterialDto): MaterialDto
-
+    //RECETAS
     @GET("receta")
     suspend fun getRecetas(): List<RecetaDto>
 
-    @POST("receta")
-    suspend fun createReceta(@Body receta: RecetaDto): RecetaDto
+    @GET("receta/{id}")
+    suspend fun getReceta(
+        @Path("id") id: Int
+    ): RecetaDto
 
+    @POST("receta")
+    suspend fun createReceta(@Body receta: RecetaDto): Response<RecetaDto>
+
+    @PUT
+    suspend fun updateReceta(
+        @Url url: String,
+        @Body receta: RecetaDto
+    ): Response<Unit>
+
+    @DELETE("receta")
+    suspend fun deleteReceta(
+        @Query("id") id: String
+    ): Response<Unit>
+
+    // USUARIOS
     @GET("usuario")
     suspend fun getUsuarios(): List<UsuarioDto>
 
