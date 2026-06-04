@@ -8,6 +8,5 @@ data class LlaveroDto(
     val id: Int? = null,
     val nombre: String,
     val descripcion: String,
-    @SerialName("precio_venta")
     val precioVenta: Double
 )

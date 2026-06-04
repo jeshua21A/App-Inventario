@@ -26,27 +26,35 @@ interface InventarioDao {
     @Query("SELECT * FROM material WHERE stockActual <= stockMinimo")
     fun getMaterialesEnEscasez(): Flow<List<MaterialEntity>>
 
-    // Descontar stock
     @Query("UPDATE material SET stockActual = stockActual - :cantidad WHERE id = :id")
     suspend fun reduceStock(id: Int, cantidad: Double)
 
     // --- Operaciones con Llaveros ---
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLlavero(llavero: LlaveroEntity)
 
+    @Update
+    suspend fun updateLlavero(llavero: LlaveroEntity)
+
+    @Delete
+    suspend fun deleteLlavero(llavero: LlaveroEntity)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertLlaveros(llavero: List<LlaveroEntity>)
+    suspend fun insertLlaveros(llaveros: List<LlaveroEntity>)
 
     @Query("SELECT * FROM llavero")
     fun getAllLlaveros(): Flow<List<LlaveroEntity>>
 
     // --- Operaciones con Recetas ---
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertIngredientesReceta(receta: RecetaEntity)
+    suspend fun insertIngredienteReceta(receta: RecetaEntity)
 
-    // Obtener los materiales de un llavero específico
+    @Delete
+    suspend fun deleteReceta(receta: RecetaEntity)
+
+    @Query("DELETE FROM receta WHERE idLlavero = :idLlavero")
+    suspend fun deleteRecetasPorLlavero(idLlavero: Int)
+
     @Query("""
         SELECT material.* FROM material
         INNER JOIN receta ON material.id = receta.idMaterial
@@ -54,13 +62,10 @@ interface InventarioDao {
     """)
     fun getMaterialesDeUnLlavero(idLlavero: Int): Flow<List<MaterialEntity>>
 
-    // --- Operaciones con Usuario ---
-
-    // Para el admin
+    // --- Consultas Especializadas ---
     @Query("SELECT * FROM material")
     fun getAllInventario(): Flow<List<MaterialEntity>>
 
-    // Para el cliente
     @Query("SELECT nombre, precioVenta FROM llavero")
     fun getCatalogoPublico(): Flow<List<LlaveroPublico>>
 }

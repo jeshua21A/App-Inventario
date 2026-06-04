@@ -19,15 +19,12 @@ class RecetasViewModel(
     private val apiService: InventarioApiService
 ) : ViewModel() {
 
-    // Estado de carga general para la UI
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // Mensaje de error para mostrar al usuario
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    // Lista de llaveros desde Room (cache local)
     val llaveros: StateFlow<List<LlaveroEntity>> = inventarioDao.getAllLlaveros()
         .stateIn(
             scope = viewModelScope,
@@ -35,7 +32,6 @@ class RecetasViewModel(
             initialValue = emptyList()
         )
 
-    // Lista de materiales desde Room (cache local)
     val materiales: StateFlow<List<MaterialEntity>> = inventarioDao.getAllMateriales()
         .stateIn(
             scope = viewModelScope,
@@ -43,25 +39,21 @@ class RecetasViewModel(
             initialValue = emptyList()
         )
 
-    // Mapa que almacena los materiales asignados a cada llavero
     private val _materialesPorLlavero = MutableStateFlow<Map<Int, List<Pair<MaterialEntity, Double>>>>(emptyMap())
     val materialesPorLlavero: StateFlow<Map<Int, List<Pair<MaterialEntity, Double>>>> = _materialesPorLlavero.asStateFlow()
 
-    // Carga todos los llaveros desde Supabase y los guarda en Room
     fun loadLlaveros() {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
             try {
                 val llaverosDto = apiService.getLlaveros()
                 llaverosDto.forEach { dto ->
-                    val entity = LlaveroEntity(
+                    inventarioDao.insertLlavero(LlaveroEntity(
                         id = dto.id ?: 0,
                         nombre = dto.nombre,
                         descripcion = dto.descripcion,
                         precioVenta = dto.precioVenta
-                    )
-                    inventarioDao.insertLlavero(entity)
+                    ))
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error al cargar llaveros: ${e.message}"
@@ -71,27 +63,21 @@ class RecetasViewModel(
         }
     }
 
-    // Carga todos los materiales desde Supabase y los guarda en Room
     fun loadMateriales(forceRefresh: Boolean = false) {
         viewModelScope.launch {
-            if (materiales.value.isNotEmpty() && !forceRefresh) {
-                return@launch
-            }
-
+            if (materiales.value.isNotEmpty() && !forceRefresh) return@launch
             _isLoading.value = true
-            _errorMessage.value = null
             try {
                 val materialesDto = apiService.getMateriales()
                 materialesDto.forEach { dto ->
-                    val entity = MaterialEntity(
+                    inventarioDao.insertMaterial(MaterialEntity(
                         id = dto.id ?: 0,
                         nombre = dto.nombre,
                         stockActual = dto.stockActual,
                         unidadMedida = dto.unidadMedida,
                         stockMinimo = dto.stockMinimo,
                         precioPorUnidad = dto.precioPorUnidad
-                    )
-                    inventarioDao.insertMaterial(entity)
+                    ))
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error al cargar materiales: ${e.message}"
@@ -101,7 +87,6 @@ class RecetasViewModel(
         }
     }
 
-    // Carga todas las recetas desde Supabase y las organiza en el mapa
     fun loadAllRecetas() {
         viewModelScope.launch {
             try {
@@ -112,13 +97,10 @@ class RecetasViewModel(
                 recetasDto.forEach { recetaDto ->
                     val material = materialesList.find { it.id == recetaDto.idMaterial }
                     if (material != null) {
-                        if (!materialesMap.containsKey(recetaDto.idLlavero)) {
-                            materialesMap[recetaDto.idLlavero] = mutableListOf()
-                        }
-                        materialesMap[recetaDto.idLlavero]?.add(material to recetaDto.cantidad)
+                        materialesMap.getOrPut(recetaDto.idLlavero) { mutableListOf() }
+                            .add(material to recetaDto.cantidad)
                     }
                 }
-
                 _materialesPorLlavero.value = materialesMap
             } catch (e: Exception) {
                 _errorMessage.value = "Error al cargar recetas: ${e.message}"
@@ -126,64 +108,44 @@ class RecetasViewModel(
         }
     }
 
-    // Obtiene los materiales asignados a un llavero especifico
     fun getMaterialesForLlavero(llaveroId: Int): List<Pair<MaterialEntity, Double>> {
         return _materialesPorLlavero.value[llaveroId] ?: emptyList()
     }
 
-    // Guarda o actualiza todas las recetas de un llavero
     fun saveRecetas(llaveroId: Int, items: List<Triple<Int, Double, Double>>) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             try {
                 val recetasExistentes = apiService.getRecetas().filter { it.idLlavero == llaveroId }
-
-                // items actuales: (materialId, cantidad, precio)
                 val nuevosMaterialesIds = items.map { it.first }.toSet()
-                val existentesMaterialesIds = recetasExistentes.map { it.idMaterial }.toSet()
 
-                // 1. Materiales a eliminar (estaban antes pero ya no)
-                val idsAEliminar = recetasExistentes.filter {
-                    !nuevosMaterialesIds.contains(it.idMaterial)
-                }.mapNotNull { it.id }
-
-                idsAEliminar.forEach { recetaId ->
-                    val response = apiService.deleteReceta("eq.$recetaId")
-                    if (!response.isSuccessful) {
-                        println("Error al eliminar receta $recetaId: ${response.errorBody()?.string()}")
+                // 1. Eliminar materiales que ya no están
+                recetasExistentes.filter { !nuevosMaterialesIds.contains(it.idMaterial) }
+                    .forEach { receta ->
+                        receta.id?.let { apiService.deleteReceta(it) }
                     }
-                }
 
-                // 2. Materiales a actualizar o crear
+                // 2. Actualizar o Crear usando parámetros nombrados
                 items.forEach { (materialId, cantidad, _) ->
                     val recetaExistente = recetasExistentes.find { it.idMaterial == materialId }
 
                     if (recetaExistente != null) {
-                        // Actualizar existente (PUT)
                         if (recetaExistente.cantidad != cantidad) {
-                            val recetaActualizada = RecetaDto(
+                            val dto = RecetaDto(
                                 idLlavero = llaveroId,
                                 idMaterial = materialId,
                                 cantidad = cantidad
                             )
-                            val recetaId = recetaExistente.id ?: return@forEach
-                            val response = apiService.updateReceta("eq.$recetaId", recetaActualizada)
-                            if (!response.isSuccessful) {
-                                println("Error al actualizar: ${response.errorBody()?.string()}")
-                            }
+                            apiService.updateReceta(recetaExistente.id!!, dto)
                         }
                     } else {
-                        // Crear nueva (POST)
-                        val recetaDto = RecetaDto(
+                        val dto = RecetaDto(
                             idLlavero = llaveroId,
                             idMaterial = materialId,
                             cantidad = cantidad
                         )
-                        val response = apiService.createReceta(recetaDto)
-                        if (!response.isSuccessful) {
-                            println("Error al crear: ${response.errorBody()?.string()}")
-                        }
+                        apiService.createReceta(dto)
                     }
                 }
 
@@ -197,8 +159,6 @@ class RecetasViewModel(
         }
     }
 
-
-    // Actualiza la cantidad de un material en una receta especifica
     fun updateRecetaCantidad(recetaId: Int, nuevaCantidad: Double) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -212,11 +172,10 @@ class RecetasViewModel(
                         idMaterial = recetaActual.idMaterial,
                         cantidad = nuevaCantidad
                     )
-                    val response = apiService.updateReceta("eq.$recetaId", recetaActualizada)
-                    if (response.isSuccessful) {
-                        loadAllRecetas()
-                        _errorMessage.value = "Cantidad actualizada"
-                    }
+                    // CORRECCIÓN: Pasar recetaId directamente como Int
+                    apiService.updateReceta(recetaId, recetaActualizada)
+                    loadAllRecetas()
+                    _errorMessage.value = "Cantidad actualizada"
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error: ${e.message}"
@@ -226,18 +185,15 @@ class RecetasViewModel(
         }
     }
 
-    // Elimina una receta especifica por su ID
-    // Elimina una receta especifica por su ID
     fun deleteReceta(recetaId: Int) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = apiService.deleteReceta("eq.$recetaId")
+                // CORRECCIÓN: Pasar recetaId directamente como Int
+                val response = apiService.deleteReceta(recetaId)
                 if (response.isSuccessful) {
                     loadAllRecetas()
                     _errorMessage.value = "Receta eliminada"
-                } else {
-                    _errorMessage.value = "Error: ${response.errorBody()?.string()}"
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error al eliminar receta: ${e.message}"
@@ -247,7 +203,6 @@ class RecetasViewModel(
         }
     }
 
-    // Limpia el mensaje de error actual
     fun clearMessages() {
         _errorMessage.value = null
     }

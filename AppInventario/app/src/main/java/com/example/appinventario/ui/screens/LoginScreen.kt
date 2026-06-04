@@ -145,14 +145,3 @@ fun LoginScreen(
         }
     }
 }
-
-// Preview (Actualizado)
-@Preview(name = "Login Screen Preview", showBackground = true, showSystemUi = true)
-@Composable
-fun LoginScreenPreview() {
-    AppInventarioTheme {
-        Box(modifier = Modifier.fillMaxSize().background(AppColors.Cream)) {
-            Text("Vista previa del Login", modifier = Modifier.align(Alignment.Center))
-        }
-    }
-}

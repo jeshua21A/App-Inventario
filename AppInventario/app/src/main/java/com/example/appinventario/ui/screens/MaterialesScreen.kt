@@ -35,40 +35,17 @@ import com.example.appinventario.ui.viewmodels.InventarioViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MaterialesScreen(
-    // TODO: Cambiar: viewModel debe ser obligatorio cuando se implemente en la app real
-    // TODO: Quitar: el valor por defecto null es solo para Preview
-    viewModel: InventarioViewModel? = null,
-
-    // TODO: Cambiar: navController debe venir de la navegación real
-    // TODO: Quitar: rememberNavController es solo para Preview
-    navController: NavController = rememberNavController(),
-
-    // TODO: Cambiar: listaMateriales debe venir del ViewModel real
-    // TODO: Quitar: el valor por defecto null es solo para Preview
-    listaMateriales: StateFlow<List<MaterialEntity>>? = null
+    onNavigateTo: (String) -> Unit,
+    onCerrarSesion: () -> Unit,
+    viewModel: InventarioViewModel = koinViewModel()
 ) {
-    // TODO: Quitar: estos datos simulados SOLO son para Preview
-    // TODO: Reemplazar: cuando viewModel no sea null, usar viewModel.listaMateriales
-    val previewData = remember {
-        MutableStateFlow(
-            listOf(
-                MaterialEntity(1, "Herrajes", 10.0, "cm", 10.0, 50.50),
-                MaterialEntity(2, "Cierres", 25.0, "pza", 5.0, 15.00),
-                MaterialEntity(3, "Argollas", 100.0, "pza", 20.0, 2.50),
-                MaterialEntity(4, "Remaches", 50.0, "pza", 10.0, 1.00),
-                MaterialEntity(5, "Parches", 8.0, "pza", 10.0, 30.00),
-                MaterialEntity(6, "Cintas", 30.0, "m", 15.0, 8.00)
-            )
-        )
-    }
 
-    // TODO: Cambiar: en la app real, usar solo viewModel.listaMateriales
-    val materialesFlow = listaMateriales ?: previewData
-    val materiales by materialesFlow.collectAsState()
+    val materiales by viewModel.listaMateriales.collectAsState()
 
     var busquedaTexto by remember { mutableStateOf("") }
     var materialEditando by remember { mutableStateOf<MaterialEntity?>(null) }
@@ -82,16 +59,13 @@ fun MaterialesScreen(
         it.nombre.contains(busquedaTexto, ignoreCase = true)
     }
 
-    // TODO: Cambiar: viewModel.cerrarSesion() debe llamar al método real
-    // TODO: Quitar: el operador ?. es solo porque viewModel es opcional en Preview
     val opcionesMenu = getOpcionesAdmin(
-        onNavigateToCatalogo = { navController.navigate(Rutas.CATALOGO) },
-        onNavigateToEdicionCatalogo = { navController.navigate(Rutas.EDICION_CATALOGO) },
-        onNavigateToMateriales = { /* ya estás aquí */ },
-        onNavigateToRecetas = { navController.navigate(Rutas.RECETA_LLAVEROS) },
-        onCerrarSesion = { viewModel?.cerrarSesion() ?: Unit }
+        onNavigateToCatalogo = { onNavigateTo(Rutas.CATALOGO) },
+        onNavigateToEdicionCatalogo = { onNavigateTo(Rutas.EDICION_CATALOGO) },
+        onNavigateToMateriales = { scope.launch { drawerState.close() } },
+        onNavigateToRecetas = { onNavigateTo(Rutas.RECETA_LLAVEROS) },
+        onCerrarSesion = onCerrarSesion
     )
-
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -251,73 +225,6 @@ fun MaterialesScreen(
             onCancelar = {
                 materialEditando = null
                 mostrarDialogoAgregar = false
-            }
-        )
-    }
-}
-
-// PREVIEW
-
-@Preview(
-    name = "Materiales Screen Preview",
-    showBackground = true,
-    showSystemUi = true
-)
-@Composable
-private fun MaterialesScreenPreview() {
-    AppInventarioTheme {
-        MaterialesScreen()
-    }
-}
-
-@Preview(
-    name = "Material Form Dialog - Modo Añadir",
-    showBackground = true
-)
-@Composable
-private fun MaterialFormDialogAddPreview() {
-    AppInventarioTheme {
-        MaterialFormDialog(
-            titulo = "Nuevo Material",
-            nombreInicial = "",
-            stockActualInicial = "",
-            stockMinimoInicial = "",
-            unidadMedidaInicial = "",
-            precioInicial = "",
-            onGuardar = { nombre, stockActual, stockMinimo, unidadMedida, precio ->
-                println("Añadir: $nombre - Stock: $stockActual - Precio: $precio")
-            },
-            onEliminar = null,
-            onCancelar = {
-                println("Cancelar")
-            }
-        )
-    }
-}
-
-// PREVIEW del Dialog
-@Preview(
-    name = "Material Form Dialog - Modo Editar",
-    showBackground = true
-)
-@Composable
-private fun MaterialFormDialogEditPreview() {
-    AppInventarioTheme {
-        MaterialFormDialog(
-            titulo = "Editar Material",
-            nombreInicial = "Herrajes",
-            stockActualInicial = "10",
-            stockMinimoInicial = "10",
-            unidadMedidaInicial = "cm",
-            precioInicial = "50.50",
-            onGuardar = { nombre, stockActual, stockMinimo, unidadMedida, precio ->
-                println("Editar: $nombre - Stock: $stockActual - Precio: $precio")
-            },
-            onEliminar = {
-                println("Eliminar material")
-            },
-            onCancelar = {
-                println("Cancelar")
             }
         )
     }

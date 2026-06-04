@@ -37,6 +37,7 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogoScreen(
+    onCerrarSesion: () -> Unit,
     viewModel: CatalogoViewModel = koinViewModel()
 ) {
     // Estados del ViewModel
@@ -66,7 +67,7 @@ fun CatalogoScreen(
 
     // Opciones del menu lateral
     val opcionesMenu = getOpcionesCliente(
-        onCerrarSesion = { /* TODO: Implementar cierre de sesión */ }
+        onCerrarSesion = onCerrarSesion
     )
 
     ModalNavigationDrawer(
@@ -193,57 +194,6 @@ fun CatalogoScreen(
         ProductoDetallesDialog(
             llavero = llaveroSeleccionado!!,
             onCerrar = { llaveroSeleccionado = null }
-        )
-    }
-}
-
-// PREVIEW DE LA PANTALLA
-@Preview(
-    name = "Catalogo Screen Preview - Menu Abierto",
-    showBackground = true,
-    showSystemUi = true
-)
-@Composable
-private fun CatalogoScreenPreviewMenuAbierto() {
-    AppInventarioTheme {
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
-
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            scrimColor = Color.Transparent,
-            drawerContent = {
-                MenuLateral(
-                    drawerState = drawerState,
-                    opciones = listOf(
-                        OpcionMenu("Cerrar Sesión", {}, esDestructiva = true)
-                    ),
-                    onCerrar = {}
-                )
-            }
-        ) {
-            CatalogoScreen()
-        }
-    }
-}
-
-// PREVIEW DEL DIALOG
-@Preview(
-    name = "Dialogo Detalles Preview",
-    showBackground = true
-)
-@Composable
-private fun ProductoDetallesDialogPreview() {
-    AppInventarioTheme {
-        val productoEjemplo = LlaveroEntity(
-            id = 1,
-            nombre = "Llavero de cuero",
-            descripcion = "Llavero de cuero personalizado con letras grabadas. Ideal para regalos y detalles especiales. Hecho con cuero 100% genuino.",
-            precioVenta = 50.50
-        )
-
-        ProductoDetallesDialog(
-            llavero = productoEjemplo,
-            onCerrar = {}
         )
     }
 }

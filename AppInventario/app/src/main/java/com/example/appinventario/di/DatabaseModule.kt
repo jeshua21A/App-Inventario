@@ -17,8 +17,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import okhttp3.MediaType.Companion.toMediaType
 import org.koin.android.ext.koin.androidContext
 
-private const val SUPABASE_URL = "https://aytckcllbulgfvkavhzt.supabase.co"
-private const val SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5dGNrY2xsYnVsZ2Z2a2F2aHp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MDQ2ODksImV4cCI6MjA5NTM4MDY4OX0.GTc7UGBW-9RMibAd9wzOAcfJXLUTYUfuNrAhOsmplBc"
+private const val BASE_URL = "http://10.0.2.2:8081"
 
 val appModule = module {
     // 1. Room Database
@@ -34,13 +33,6 @@ val appModule = module {
     // 3. OkHttpClient con interceptores
     single<OkHttpClient> {
         OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                chain.proceed(chain.request().newBuilder()
-                    .addHeader("apikey", SUPABASE_ANON_KEY)
-                    .addHeader("Authorization", "Bearer $SUPABASE_ANON_KEY")
-                    .addHeader("Content-Type", "application/json")
-                    .build())
-            }
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             })
@@ -59,7 +51,7 @@ val appModule = module {
         }
 
         Retrofit.Builder()
-            .baseUrl("$SUPABASE_URL/rest/v1/")
+            .baseUrl("$BASE_URL/")
             .client(get<OkHttpClient>())
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()

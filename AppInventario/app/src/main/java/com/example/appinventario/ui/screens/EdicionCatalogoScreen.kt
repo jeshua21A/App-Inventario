@@ -14,15 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.appinventario.R
 import com.example.appinventario.data.local.entities.LlaveroEntity
 import com.example.appinventario.navigation.Rutas
@@ -30,17 +27,17 @@ import com.example.appinventario.ui.components.*
 import com.example.appinventario.ui.screens.Edicion.ProductoCardEditable
 import com.example.appinventario.ui.screens.Edicion.LlaveroFormDialog
 import com.example.appinventario.ui.theme.AppColors
-import com.example.appinventario.ui.theme.AppInventarioTheme
 import com.example.appinventario.ui.viewmodels.CatalogoViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EdicionCatalogoScreen(
-    navController: NavController,
-    viewModel: CatalogoViewModel
+    onNavigateTo: (String) -> Unit,
+    onCerrarSesion: () -> Unit,
+    viewModel: CatalogoViewModel = koinViewModel()
 ) {
 
     val llaveros by viewModel.listaLlaveros.collectAsState()
@@ -59,15 +56,11 @@ fun EdicionCatalogoScreen(
     }
 
     val opcionesMenu = getOpcionesAdmin(
-        onNavigateToCatalogo = { navController.navigate(Rutas.CATALOGO) },
+        onNavigateToCatalogo = { onNavigateTo(Rutas.CATALOGO) },
         onNavigateToEdicionCatalogo = { scope.launch { drawerState.close() } },
-        onNavigateToMateriales = { navController.navigate(Rutas.MATERIALES) },
-        onNavigateToRecetas = { navController.navigate(Rutas.RECETA_LLAVEROS) },
-        onCerrarSesion = {
-            navController.navigate(Rutas.LOGIN) {
-                popUpTo(0)
-            }
-        }
+        onNavigateToMateriales = { onNavigateTo(Rutas.MATERIALES) },
+        onNavigateToRecetas = { onNavigateTo(Rutas.RECETA_LLAVEROS) },
+        onCerrarSesion = onCerrarSesion
     )
 
     ModalNavigationDrawer(

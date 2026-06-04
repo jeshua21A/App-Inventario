@@ -38,8 +38,9 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecetaLlaverosScreen(
-    viewModel: RecetasViewModel = koinViewModel(),
-    navController: NavController = rememberNavController()
+    onNavigateTo: (String) -> Unit,
+    onCerrarSesion: () -> Unit,
+    viewModel: RecetasViewModel = koinViewModel()
 ) {
 
     val llaveros by viewModel.llaveros.collectAsState()
@@ -79,11 +80,11 @@ fun RecetaLlaverosScreen(
     }
 
     val opcionesMenu = getOpcionesAdmin(
-        onNavigateToCatalogo = { navController.navigate(Rutas.CATALOGO) },
-        onNavigateToEdicionCatalogo = { navController.navigate(Rutas.EDICION_CATALOGO) },
-        onNavigateToMateriales = { navController.navigate(Rutas.MATERIALES) },
-        onNavigateToRecetas = { },
-        onCerrarSesion = { }
+        onNavigateToCatalogo = { onNavigateTo(Rutas.CATALOGO) },
+        onNavigateToEdicionCatalogo = { onNavigateTo(Rutas.EDICION_CATALOGO) },
+        onNavigateToMateriales = { onNavigateTo(Rutas.MATERIALES) },
+        onNavigateToRecetas = { scope.launch { drawerState.close() } },
+        onCerrarSesion = onCerrarSesion
     )
 
     ModalNavigationDrawer(
@@ -272,19 +273,5 @@ fun RecetaLlaverosScreen(
                 }
             )
         }
-    }
-}
-
-// PREVIEW
-@Preview(
-    name = "Receta Llaveros Screen Preview",
-    showBackground = true,
-
-    showSystemUi = true
-)
-@Composable
-private fun RecetaLlaverosScreenPreview() {
-    AppInventarioTheme {
-        RecetaLlaverosScreen()
     }
 }

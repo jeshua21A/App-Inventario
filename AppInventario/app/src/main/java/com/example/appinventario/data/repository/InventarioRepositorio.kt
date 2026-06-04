@@ -58,10 +58,31 @@ class InventarioRepositorio @Inject constructor(
         inventarioDao.insertLlavero(dto.toEntity())
     }
 
+    suspend fun guardarLlavero(llavero: LlaveroEntity) {
+        if (llavero.id == 0) {
+            // Es nuevo: POST
+            val dto = apiService.createLlavero(llavero.toDto())
+            inventarioDao.insertLlavero(dto.toEntity())
+        } else {
+            val dto = apiService.updateLlavero(llavero.id, llavero.toDto())
+            inventarioDao.updateLlavero(dto.toEntity())
+        }
+    }
+
     suspend fun eliminarLlavero(llavero: LlaveroEntity) {
-        val response = apiService.deleteLlavero(llavero.id)
-        // Nota: Agregaremos deleteLlavero al DAO si es necesario, 
-        // por ahora usamos la lógica de la API
+        try {
+            // 1. Intentamos borrar en el servidor (Backend Ktor)
+            val response = apiService.deleteLlavero(llavero.id)
+
+            // 2. Si el servidor responde que se borró con éxito (código 200-299)
+            if (response.isSuccessful) {
+                // 3. Lo borramos de la base de datos local del celular
+                inventarioDao.deleteLlavero(llavero)
+            }
+        } catch (e: Exception) {
+            // Manejo de errores (por ejemplo, si no hay internet)
+            e.printStackTrace()
+        }
     }
 
     // --- AUTH ---

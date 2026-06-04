@@ -27,7 +27,7 @@ class AuthViewModel(
                 val usuario = repositorio.login(user, pass)
                 _authState.value = AuthState.Autenticado(usuario)
             } catch (e: Exception) {
-                _authState.value = AuthState.Error("Credenciales incorrectas o error de conexión")
+                _authState.value = AuthState.Error("Error: ${e.localizedMessage}")
             }
         }
     }
