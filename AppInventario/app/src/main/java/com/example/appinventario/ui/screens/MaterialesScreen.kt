@@ -20,10 +20,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.appinventario.R
+import com.example.appinventario.data.local.entities.LlaveroEntity
 import com.example.appinventario.data.local.entities.MaterialEntity
 import com.example.appinventario.navigation.Rutas
 import com.example.appinventario.ui.components.*
@@ -31,67 +33,44 @@ import com.example.appinventario.ui.screens.Materiales.MaterialCard
 import com.example.appinventario.ui.screens.Materiales.MaterialFormDialog
 import com.example.appinventario.ui.theme.AppColors
 import com.example.appinventario.ui.theme.AppInventarioTheme
-import com.example.appinventario.ui.viewmodels.InventarioViewModel
+import com.example.appinventario.ui.viewmodels.MaterialesViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+import kotlin.collections.chunked
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MaterialesScreen(
-    // TODO: Cambiar: viewModel debe ser obligatorio cuando se implemente en la app real
-    // TODO: Quitar: el valor por defecto null es solo para Preview
-    viewModel: InventarioViewModel? = null,
-
-    // TODO: Cambiar: navController debe venir de la navegación real
-    // TODO: Quitar: rememberNavController es solo para Preview
-    navController: NavController = rememberNavController(),
-
-    // TODO: Cambiar: listaMateriales debe venir del ViewModel real
-    // TODO: Quitar: el valor por defecto null es solo para Preview
-    listaMateriales: StateFlow<List<MaterialEntity>>? = null
+    viewModel: MaterialesViewModel = koinViewModel(),
 ) {
-    // TODO: Quitar: estos datos simulados SOLO son para Preview
-    // TODO: Reemplazar: cuando viewModel no sea null, usar viewModel.listaMateriales
-    val previewData = remember {
-        MutableStateFlow(
-            listOf(
-                MaterialEntity(1, "Herrajes", 10.0, "cm", 10.0, 50.50),
-                MaterialEntity(2, "Cierres", 25.0, "pza", 5.0, 15.00),
-                MaterialEntity(3, "Argollas", 100.0, "pza", 20.0, 2.50),
-                MaterialEntity(4, "Remaches", 50.0, "pza", 10.0, 1.00),
-                MaterialEntity(5, "Parches", 8.0, "pza", 10.0, 30.00),
-                MaterialEntity(6, "Cintas", 30.0, "m", 15.0, 8.00)
-            )
-        )
-    }
-
-    // TODO: Cambiar: en la app real, usar solo viewModel.listaMateriales
-    val materialesFlow = listaMateriales ?: previewData
-    val materiales by materialesFlow.collectAsState()
+    val listaMateriales by viewModel.listaMateriles.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     var busquedaTexto by remember { mutableStateOf("") }
-    var materialEditando by remember { mutableStateOf<MaterialEntity?>(null) }
-    var mostrarDialogoAgregar by remember { mutableStateOf(false) }
+    var materialSeleccionado by remember { mutableStateOf<MaterialEntity?>(null) }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val materialesVisibles = if (busquedaTexto.isBlank()) materiales
-    else materiales.filter {
+    LaunchedEffect(Unit){
+        if(listaMateriales.isEmpty()){
+            viewModel.cargarMateriales()
+        }
+    }
+
+    // Filtrar materiales por busqueda
+    val materialesFiltrados = if (busquedaTexto.isBlank()) listaMateriales
+    else listaMateriales.filter {
         it.nombre.contains(busquedaTexto, ignoreCase = true)
     }
 
-    // TODO: Cambiar: viewModel.cerrarSesion() debe llamar al método real
-    // TODO: Quitar: el operador ?. es solo porque viewModel es opcional en Preview
-    val opcionesMenu = getOpcionesAdmin(
-        onNavigateToCatalogo = { navController.navigate(Rutas.CATALOGO) },
-        onNavigateToEdicionCatalogo = { navController.navigate(Rutas.EDICION_CATALOGO) },
-        onNavigateToMateriales = { /* ya estás aquí */ },
-        onNavigateToRecetas = { navController.navigate(Rutas.RECETA_LLAVEROS) },
-        onCerrarSesion = { viewModel?.cerrarSesion() ?: Unit }
+    // Opciones del menu lateral
+    val opcionesMenu = getOpcionesCliente(
+        onCerrarSesion = { /* TODO: Implementar cierre de sesión */ }
     )
-
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -120,8 +99,6 @@ fun MaterialesScreen(
                         contentScale = ContentScale.FillBounds
                     )
 
-
-
                     IconButton(
                         onClick = {
                             if (drawerState.isOpen) scope.launch { drawerState.close() }
@@ -146,36 +123,42 @@ fun MaterialesScreen(
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                BarraBusqueda(value = busquedaTexto, onValueChange = { busquedaTexto = it })
+
                 Spacer(modifier = Modifier.height(14.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    BarraBusqueda(
-                        value = busquedaTexto,
-                        onValueChange = { busquedaTexto = it },
-                        modifier = Modifier.weight(1f)
+                // Mostrar mensaje de error si existe
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = AppColors.ErrorRed,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(8.dp)
                     )
-
-                    BotonAnadir(
-                        onClick = { mostrarDialogoAgregar = true }
-                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
-
-                if (materialesVisibles.isEmpty()) {
+                // Mostrar loading
+                if (isLoading && listaMateriales.isEmpty()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Sin materiales. Agrega el primero.", color = AppColors.BrownSub, fontSize = 15.sp)
+                        CircularProgressIndicator()
+                    }
+                } else if (materialesFiltrados.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Sin productos disponibles.", color = AppColors.BrownSub, fontSize = 15.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { viewModel.cargarMateriales() }) {
+                                Text("Cargar desde la nube")
+                            }
+                        }
                     }
                 } else {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(materialesVisibles.chunked(2)) { filaMateriales ->
+                        items(materialesFiltrados.chunked(2)) { filaMateriales ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -184,7 +167,7 @@ fun MaterialesScreen(
                                     MaterialCard(
                                         material = filaMateriales[0],
                                         modifier = Modifier.weight(1f),
-                                        onEditar = { materialEditando = filaMateriales[0] }
+                                        onEditar = { materialSeleccionado = filaMateriales[0] }
                                     )
                                 } else {
                                     Spacer(modifier = Modifier.weight(1f))
@@ -194,7 +177,7 @@ fun MaterialesScreen(
                                     MaterialCard(
                                         material = filaMateriales[1],
                                         modifier = Modifier.weight(1f),
-                                        onEditar = { materialEditando = filaMateriales[1] }
+                                        onEditar = { materialSeleccionado = filaMateriales[1] }
                                     )
                                 } else {
                                     Spacer(modifier = Modifier.weight(1f))
@@ -206,58 +189,9 @@ fun MaterialesScreen(
             }
         }
     }
-
-    // Diálogo para editar/agregar materiales
-    if (materialEditando != null || mostrarDialogoAgregar) {
-        MaterialFormDialog(
-            titulo = if (materialEditando != null) "Editar Material" else "Nuevo Material",
-            nombreInicial = materialEditando?.nombre ?: "",
-            stockActualInicial = materialEditando?.stockActual?.toString() ?: "",
-            stockMinimoInicial = materialEditando?.stockMinimo?.toString() ?: "",
-            unidadMedidaInicial = materialEditando?.unidadMedida ?: "",
-            precioInicial = materialEditando?.precioPorUnidad?.toString() ?: "",
-            onGuardar = { nombre, stockActual, stockMinimo, unidadMedida, precio ->
-                if (materialEditando != null) {
-                    // TODO: viewModel.actualizarMaterial()
-                    viewModel?.actualizarMaterial(
-                        materialEditando!!.copy(
-                            nombre = nombre,
-                            stockActual = stockActual,
-                            stockMinimo = stockMinimo,
-                            unidadMedida = unidadMedida,
-                            precioPorUnidad = precio
-                        )
-                    )
-                } else {
-                    // TODO: viewModel.agregarMaterial()
-                    viewModel?.agregarMaterial(
-                        nombre = nombre,
-                        stock = stockActual,
-                        unidad = unidadMedida,
-                        minimo = stockMinimo,
-                        precio = precio
-                    )
-                }
-                materialEditando = null
-                mostrarDialogoAgregar = false
-            },
-            onEliminar = if (materialEditando != null) {
-                {
-                    // TODO: viewModel.eliminarMaterial()
-                    viewModel?.eliminarMaterial(materialEditando!!)
-                    materialEditando = null
-                }
-            } else null,
-            onCancelar = {
-                materialEditando = null
-                mostrarDialogoAgregar = false
-            }
-        )
-    }
 }
 
 // PREVIEW
-
 @Preview(
     name = "Materiales Screen Preview",
     showBackground = true,
@@ -266,10 +200,26 @@ fun MaterialesScreen(
 @Composable
 private fun MaterialesScreenPreview() {
     AppInventarioTheme {
-        MaterialesScreen()
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
+
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            scrimColor = Color.Transparent,
+            drawerContent = {
+                MenuLateral(
+                    drawerState = drawerState,
+                    opciones = listOf(
+                        OpcionMenu("Cerrar Sesión", {}, esDestructiva = true)
+                    ),
+                    onCerrar = {}
+                )
+            }
+        ) {
+            MaterialesScreen()
+        }
     }
 }
-
+/*
 @Preview(
     name = "Material Form Dialog - Modo Añadir",
     showBackground = true
@@ -294,6 +244,7 @@ private fun MaterialFormDialogAddPreview() {
         )
     }
 }
+ */
 
 // PREVIEW del Dialog
 @Preview(

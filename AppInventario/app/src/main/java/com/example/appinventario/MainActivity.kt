@@ -39,9 +39,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppInventarioTheme {
                 // Mostrar CatalogoScreen (con Koin, se obtiene automáticamente)
-                CatalogoScreen()
+                //CatalogoScreen()
                 // MaterialesScreen(viewModel = inventarioViewModel)
-
+                MaterialesScreen()
                 /*
                 // Código original comentado:
                 // Creamos o recuperamos el ViewModel
