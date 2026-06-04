@@ -5,6 +5,7 @@ import com.example.appinventario.data.network.InventarioApiService
 import com.example.appinventario.data.repository.InventarioRepositorio
 import com.example.appinventario.ui.viewmodels.InventarioViewModel
 import com.example.appinventario.ui.viewmodels.CatalogoViewModel
+import com.example.appinventario.ui.viewmodels.MaterialesViewModel
 import com.example.appinventario.ui.viewmodels.RecetasViewModel
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -92,6 +93,14 @@ val appModule = module {
         RecetasViewModel(
             inventarioDao = get(),
             apiService = get()
+        )
+    }
+
+    //View Model de Materiales
+    viewModel {
+        MaterialesViewModel(
+            inventarioDao = get(),
+            inventarioApi = get()
         )
     }
 }

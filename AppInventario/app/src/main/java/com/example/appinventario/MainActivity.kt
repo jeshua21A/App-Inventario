@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                 // MaterialesScreen(viewModel = inventarioViewModel)
 
                 // Mostrar MaterialesScreen
-                //MaterialesScreen()
+                MaterialesScreen()
 
                 //Mostrar pantalla de recetas
                 //RecetaLlaverosScreen()

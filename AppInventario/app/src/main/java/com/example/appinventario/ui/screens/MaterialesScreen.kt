@@ -63,13 +63,14 @@ fun MaterialesScreen(
         }
     }
 
-    // Filtrar materiales por busqueda
-    val materialesFiltrados =
-        if (busquedaTexto.isBlank())
+    // Filtrar materiales por búsqueda de manera reactiva
+    val materialesFiltrados = remember(busquedaTexto, materiales) {
+        if (busquedaTexto.isBlank()) {
             materiales
-        else materiales.filter {
-            it.nombre.contains(busquedaTexto, ignoreCase = true)
+        } else {
+            materiales.filter { it.nombre.contains(busquedaTexto, ignoreCase = true) }
         }
+    }
 
     // Opciones del menu lateral (Admin)
     val opcionesMenu = getOpcionesAdmin(
@@ -109,10 +110,13 @@ fun MaterialesScreen(
 
                     IconButton(
                         onClick = {
-                            if (drawerState.isOpen) scope.launch { drawerState.close() }
-                            else scope.launch { drawerState.open() }
+                            scope.launch {
+                                if (drawerState.isOpen) drawerState.close() else drawerState.open()
+                            }
                         },
-                        modifier = Modifier.align(Alignment.TopStart).padding(start = 8.dp, top = 8.dp)
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 8.dp)
                     ) {
                         Icon(
                             imageVector = if (drawerState.isOpen) Icons.Default.Close else Icons.Default.Menu,
