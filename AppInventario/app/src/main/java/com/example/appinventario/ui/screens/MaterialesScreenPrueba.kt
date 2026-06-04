@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.example.appinventario.ui.viewmodels.InventarioViewModel
 
 @Composable
-fun MaterialesScreen(viewModel: InventarioViewModel){
+fun MaterialesScreenPrueba(viewModel: InventarioViewModel){
     // observamos la lista de materiales del ViewModel
     val listaMateriales by viewModel.listaMateriales.collectAsState()
 
@@ -64,7 +64,7 @@ fun MaterialesScreen(viewModel: InventarioViewModel){
                         minimo = 1.0,
                         precio = precio.toDoubleOrNull() ?: 0.0
                     )
-                    // Limpiar campos después de guardar
+                    // Limpiar campos despues de guardar
                     nombre = ""
                     stock = ""
                     precio = ""
